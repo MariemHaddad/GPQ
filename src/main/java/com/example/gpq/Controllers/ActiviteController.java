@@ -8,10 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/activites")
@@ -28,6 +25,30 @@ private IActiviteService activiteService;
             return ResponseEntity.ok("Activité ajoutée avec succès.");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Seuls les utilisateurs avec le rôle d'Admin peuvent ajouter des activités.");
+        }
+    }
+
+    @PutMapping("/modifier/{id}")
+    public ResponseEntity<String> modifierActivite(@PathVariable("id") Long id, @RequestBody Activite activite, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user != null && user.getRole() == Role.Admin) {
+            activiteService.modifierActivite(id, activite);
+            return ResponseEntity.ok("Activité modifiée avec succès.");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Seuls les utilisateurs avec le rôle d'Admin peuvent modifier des activités.");
+        }
+    }
+
+    @DeleteMapping("/supprimer/{id}")
+    public ResponseEntity<String> supprimerActivite(@PathVariable("id") Long id, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user != null && user.getRole() == Role.Admin) {
+            activiteService.supprimerActivite(id);
+            return ResponseEntity.ok("Activité supprimée avec succès.");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Seuls les utilisateurs avec le rôle d'Admin peuvent supprimer des activités.");
         }
     }
 }

@@ -2,8 +2,6 @@ package com.example.gpq.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
@@ -14,14 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class Activite {
+public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long idA;
-    private String nomA;
-    @OneToMany(mappedBy = "activite",cascade = CascadeType.REMOVE)
+    private Long idC;
+    private String nomC;
+    @OneToMany(mappedBy = "client",cascade = CascadeType.REMOVE)
     private List<Projet> projet;
-
 }
-
