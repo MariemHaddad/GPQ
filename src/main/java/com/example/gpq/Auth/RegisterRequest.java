@@ -1,5 +1,6 @@
 package com.example.gpq.Auth;
 
+import com.example.gpq.Entities.AccountStatus;
 import com.example.gpq.Entities.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,5 +17,5 @@ public class RegisterRequest {
     private String email;
     private String password;
     private Role role;
-
+    private AccountStatus accountStatus;
 }

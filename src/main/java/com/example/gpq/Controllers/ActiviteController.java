@@ -20,7 +20,7 @@ private IActiviteService activiteService;
     public ResponseEntity<String> ajouterActivite(@RequestBody Activite activite, HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("user");
 
-        if (user != null && user.getRole() == Role.Admin) {
+        if (user != null && user.getRole() == Role.ADMIN) {
             activiteService.ajouterActivite(activite);
             return ResponseEntity.ok("Activité ajoutée avec succès.");
         } else {
@@ -32,7 +32,7 @@ private IActiviteService activiteService;
     public ResponseEntity<String> modifierActivite(@PathVariable("id") Long id, @RequestBody Activite activite, HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("user");
 
-        if (user != null && user.getRole() == Role.Admin) {
+        if (user != null && user.getRole() == Role.ADMIN) {
             activiteService.modifierActivite(id, activite);
             return ResponseEntity.ok("Activité modifiée avec succès.");
         } else {
@@ -44,7 +44,7 @@ private IActiviteService activiteService;
     public ResponseEntity<String> supprimerActivite(@PathVariable("id") Long id, HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("user");
 
-        if (user != null && user.getRole() == Role.Admin) {
+        if (user != null && user.getRole() == Role.ADMIN) {
             activiteService.supprimerActivite(id);
             return ResponseEntity.ok("Activité supprimée avec succès.");
         } else {

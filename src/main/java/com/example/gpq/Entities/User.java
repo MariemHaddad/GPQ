@@ -4,11 +4,10 @@ package com.example.gpq.Entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,18 +18,21 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
+@Table(name ="user")
+@EntityListeners(AuditingEntityListener.class)
 
-public class User implements UserDetails, Principal {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long idU;
     private String nom;
     private String prenom;
+   @Column (unique=true)
     private String email;
     private String motDePasse;
-    private boolean accountLocked;
-    private boolean enabled;
+
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -44,7 +46,7 @@ public class User implements UserDetails, Principal {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
@@ -74,13 +76,15 @@ public class User implements UserDetails, Principal {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return true;
     }
 
-    @Override
-    public String getName() {
-        return email;
+
+    private String FullName(){
+        return nom + "" + prenom;
     }
+    @Enumerated(EnumType.STRING)
+    private AccountStatus accountStatus;
 }
 
 

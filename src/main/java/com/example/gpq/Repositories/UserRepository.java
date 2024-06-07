@@ -1,5 +1,6 @@
 package com.example.gpq.Repositories;
 
+import com.example.gpq.Entities.AccountStatus;
 import com.example.gpq.Entities.Role;
 import com.example.gpq.Entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     List<User> findByRole(Role role);
 
+    List<User> findByAccountStatus(AccountStatus status);
 }

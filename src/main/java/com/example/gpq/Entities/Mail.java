@@ -1,5 +1,6 @@
 package com.example.gpq.Entities;
 
+import jakarta.mail.Session;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;

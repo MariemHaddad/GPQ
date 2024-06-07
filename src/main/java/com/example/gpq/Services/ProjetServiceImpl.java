@@ -23,7 +23,7 @@ public class ProjetServiceImpl implements IProjetService{
     public void ajouterProjetAvecAffectation(User utilisateurConnecte, Projet projet,
                                              Long chefDeProjetId, Long responsableQualiteId) {
         // Vérifier le rôle de l'utilisateur connecté
-        if (utilisateurConnecte.getRole() == Role.Directeur) {
+        if (utilisateurConnecte.getRole() == Role.DIRECTEUR) {
             // Si c'est un directeur, il doit choisir à la fois le chef de projet et le responsable qualité
             User chefDeProjet = userRepository.findById(chefDeProjetId)
                     .orElseThrow(() -> new IllegalArgumentException("Chef de projet non trouvé avec l'ID spécifié"));
@@ -32,7 +32,7 @@ public class ProjetServiceImpl implements IProjetService{
 
             // Attribuer les utilisateurs récupérés au projet
             attribuerUtilisateursAuProjet(projet, chefDeProjet, responsableQualite);
-        } else if (utilisateurConnecte.getRole() == Role.Chef_de_projet) {
+        } else if (utilisateurConnecte.getRole() == Role.CHEFDEPROJET) {
             // Si c'est un chef de projet, il doit choisir seulement le responsable qualité
             User responsableQualite = userRepository.findById(responsableQualiteId)
                     .orElseThrow(() -> new IllegalArgumentException("Responsable qualité non trouvé avec l'ID spécifié"));

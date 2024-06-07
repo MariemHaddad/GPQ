@@ -64,11 +64,11 @@ private IUserService userService;
     private String getRoleMessage(Role role) {
         if (role != null) {
             switch (role) {
-                case Chef_de_projet:
+                case CHEFDEPROJET:
                     return "le chef de projet";
-                case Admin:
+                case ADMIN:
                     return "l'admin";
-                case Directeur:
+                case DIRECTEUR:
                     return "le directeur";
                 default:
                     return "l'utilisateur";
