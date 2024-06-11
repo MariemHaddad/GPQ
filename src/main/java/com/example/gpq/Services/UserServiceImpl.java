@@ -4,6 +4,7 @@ import com.example.gpq.Entities.User;
 import com.example.gpq.Repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,21 @@ public class UserServiceImpl implements IUserService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
-
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public User loadUserByUsername(String email) {
+        return findByEmail(email);
+    }
+}
+
 
 

@@ -59,30 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Ajoutez un log pour indiquer que la validation du token a échoué
                 log.warn("JWT Token validation failed for user: {}", userEmail);
             }
-
-
-            // Si userEmail est différent de null et que l'authentification n'est pas déjà configurée
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                 userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                if (jwtService.validateToken(jwt, userDetails)) {
-                    // Valider le jeton JWT et configurer l'authentification
-                    log.info("JWT Token validated successfully for user: {}", userEmail);
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                } else {
-                    // Ajouter un log pour indiquer que la validation du token a échoué
-                    log.warn("JWT Token validation failed for user: {}", userEmail);
-                }
-            }
-
-
         }
         filterChain.doFilter(request, response);
     }

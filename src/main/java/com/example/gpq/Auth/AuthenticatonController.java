@@ -1,5 +1,6 @@
 package com.example.gpq.Auth;
 
+import com.example.gpq.Configuration.JwtService;
 import com.example.gpq.Entities.AccountStatus;
 import com.example.gpq.Entities.User;
 import com.example.gpq.Services.EmailServiceImpl;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -15,7 +17,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/authentication")
@@ -26,6 +30,9 @@ public class AuthenticatonController {
     private final AuthenticationService service;
     @Autowired
     private EmailServiceImpl emailService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
@@ -59,10 +66,15 @@ public class AuthenticatonController {
         return ResponseEntity.ok("User logged out successfully.");
     }
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody String oldToken) {
-        String newToken = service.refreshToken(oldToken);
-        return ResponseEntity.ok(newToken);
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        if (jwtService.validateToken(refreshToken, null)){
+            String newToken = jwtService.generateTokenFromRefreshToken(refreshToken);
+            return ResponseEntity.ok(Collections.singletonMap("token", newToken));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
     @GetMapping("/pending-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> getPendingUsers() {
