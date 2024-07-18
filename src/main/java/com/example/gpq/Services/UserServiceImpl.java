@@ -1,5 +1,6 @@
 package com.example.gpq.Services;
 
+import com.example.gpq.Entities.Role;
 import com.example.gpq.Entities.User;
 import com.example.gpq.Repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -43,11 +45,21 @@ public class UserServiceImpl implements IUserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
+    public User findByNom(String nom) {
+        return userRepository.findByNom(nom);
+    }
 
+    @Override
+    public List<User> findByRole(Role role) {
+        // Logique pour récupérer les utilisateurs par rôle depuis le repository
+        return userRepository.findByRole(role);
+    }
     @Override
     public User loadUserByUsername(String email) {
         return findByEmail(email);
     }
+
+
 }
 
 

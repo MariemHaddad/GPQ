@@ -1,5 +1,6 @@
 package com.example.gpq.Services;
 
+import com.example.gpq.Entities.Activite;
 import com.example.gpq.Entities.Projet;
 import com.example.gpq.Entities.Role;
 import com.example.gpq.Entities.User;
@@ -10,32 +11,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
-public class ProjetServiceImpl implements IProjetService{
+public class ProjetServiceImpl implements IProjetService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserServiceImpl userService;
 
     @Autowired
     private ProjetRepository projetRepository;
 
     public void ajouterProjetAvecAffectation(User utilisateurConnecte, Projet projet,
-                                             Long chefDeProjetId, Long responsableQualiteId) {
+                                             String chefDeProjetNom, String responsableQualiteNom) {
         // Vérifier le rôle de l'utilisateur connecté
         if (utilisateurConnecte.getRole() == Role.DIRECTEUR) {
             // Si c'est un directeur, il doit choisir à la fois le chef de projet et le responsable qualité
-            User chefDeProjet = userRepository.findById(chefDeProjetId)
-                    .orElseThrow(() -> new IllegalArgumentException("Chef de projet non trouvé avec l'ID spécifié"));
-            User responsableQualite = userRepository.findById(responsableQualiteId)
-                    .orElseThrow(() -> new IllegalArgumentException("Responsable qualité non trouvé avec l'ID spécifié"));
+            User chefDeProjet = userService.findByNom(chefDeProjetNom);
+            if (chefDeProjet == null || !chefDeProjet.getRole().equals(Role.CHEFDEPROJET)) {
+                throw new IllegalArgumentException("Chef de projet non trouvé ou invalide avec le nom spécifié");
+            }
+
+            User responsableQualite = userService.findByNom(responsableQualiteNom);
+            if (responsableQualite == null || !responsableQualite.getRole().equals(Role.RQUALITE)) {
+                throw new IllegalArgumentException("Responsable qualité non trouvé ou invalide avec le nom spécifié");
+            }
 
             // Attribuer les utilisateurs récupérés au projet
             attribuerUtilisateursAuProjet(projet, chefDeProjet, responsableQualite);
         } else if (utilisateurConnecte.getRole() == Role.CHEFDEPROJET) {
             // Si c'est un chef de projet, il doit choisir seulement le responsable qualité
-            User responsableQualite = userRepository.findById(responsableQualiteId)
-                    .orElseThrow(() -> new IllegalArgumentException("Responsable qualité non trouvé avec l'ID spécifié"));
+            User responsableQualite = userService.findByNom(responsableQualiteNom);
+            if (responsableQualite == null || !responsableQualite.getRole().equals(Role.RQUALITE)) {
+                throw new IllegalArgumentException("Responsable qualité non trouvé ou invalide avec le nom spécifié");
+            }
 
             // Attribuer le chef de projet (l'utilisateur connecté) et le responsable qualité au projet
             attribuerUtilisateursAuProjet(projet, utilisateurConnecte, responsableQualite);
@@ -55,5 +66,22 @@ public class ProjetServiceImpl implements IProjetService{
             // Gérer le cas où aucun utilisateur approprié n'est disponible
             throw new IllegalStateException("Impossible d'attribuer les utilisateurs au projet : utilisateurs indisponibles");
         }
+    }
+
+    public List<Projet> findByActivite(Activite activite) {
+        List<Projet> projets = projetRepository.findByActivite(activite);
+        for (Projet projet : projets) {
+            if (projet.getResponsableQualite() != null) {
+                projet.setResponsableQualiteNom(projet.getResponsableQualite().getNom());
+            }
+            if (projet.getChefDeProjet() != null) {
+                projet.setChefDeProjetNom(projet.getChefDeProjet().getNom());
+            }
+        }
+        return projets;
+    }
+    @Override
+    public Optional<Projet> findById(Long id) {
+        return projetRepository.findById(id);
     }
 }

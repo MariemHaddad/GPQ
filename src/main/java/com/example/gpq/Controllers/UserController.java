@@ -18,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -202,6 +204,17 @@ private IUserService userService;
         message.setSubject(subject);
         message.setText(text);
         javaMailSender.send(message);
+    }
+    @GetMapping("/chefsdeprojet")
+    public ResponseEntity<List<User>> getChefsDeProjet() {
+        List<User> chefsDeProjet = userService.findByRole(Role.CHEFDEPROJET);
+        return ResponseEntity.ok(chefsDeProjet);
+    }
+
+    @GetMapping("/responsablesqualite")
+    public ResponseEntity<List<User>> getResponsablesQualite() {
+        List<User> responsablesQualite = userService.findByRole(Role.RQUALITE);
+        return ResponseEntity.ok(responsablesQualite);
     }
 
 }

@@ -5,8 +5,7 @@ import com.example.gpq.Services.IActiviteService;
 import com.example.gpq.Services.IClientService;
 import com.example.gpq.Services.IProjetService;
 import com.example.gpq.Services.IUserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/projet")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -30,16 +32,27 @@ public class ProjetController {
 
     @Autowired
     private IClientService clientService;
+    @GetMapping("/chefsdeprojet")
+    public ResponseEntity<List<User>> getChefsDeProjet() {
+        List<User> chefsDeProjet = userService.findByRole(Role.CHEFDEPROJET);
+        return ResponseEntity.ok(chefsDeProjet);
+    }
+
+    @GetMapping("/responsablesqualite")
+    public ResponseEntity<List<User>> getResponsablesQualite() {
+        List<User> responsablesQualite = userService.findByRole(Role.RQUALITE);
+        return ResponseEntity.ok(responsablesQualite);
+    }
 
     @PostMapping("/ajouter")
     @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('DIRECTEUR')")
-    public ResponseEntity<String> ajouterProjet(@RequestBody Projet projet,
-                                                @RequestParam(value = "activiteId") Long activiteId,
-                                                @RequestParam(value = "chefDeProjetId", required = false) Long chefDeProjetId,
-                                                @RequestParam("responsableQualiteId") Long responsableQualiteId,
-                                                @RequestParam("nomC") String nomC) {
+    public ResponseEntity<String> ajouterProjet(
+            @RequestBody Projet projet,
+            @RequestParam(value = "activiteId") Long activiteId,
+            @RequestParam(value = "chefDeProjetNom", required = false) String chefDeProjetNom,
+            @RequestParam("responsableQualiteNom") String responsableQualiteNom,
+            @RequestParam("nomC") String nomC) {
 
-        // Récupérer l'utilisateur connecté depuis le contexte de sécurité
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
@@ -50,7 +63,7 @@ public class ProjetController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Activité non trouvée.");
             }
 
-            User responsableQualite = userService.findById(responsableQualiteId);
+            User responsableQualite = userService.findByNom(responsableQualiteNom);
             if (responsableQualite == null || !responsableQualite.getRole().equals(Role.RQUALITE)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Responsable qualité non trouvé ou invalide.");
             }
@@ -66,17 +79,16 @@ public class ProjetController {
             projet.setResponsableQualite(responsableQualite);
             projet.setClient(client);
 
-            // Vérification du rôle
             if (utilisateurConnecte.getRole().equals(Role.CHEFDEPROJET)) {
                 projet.setChefDeProjet(utilisateurConnecte);
-                projetService.ajouterProjetAvecAffectation(utilisateurConnecte, projet, null, responsableQualiteId);
+                projetService.ajouterProjetAvecAffectation(utilisateurConnecte, projet, null, responsableQualiteNom);
             } else if (utilisateurConnecte.getRole().equals(Role.DIRECTEUR)) {
-                User chefDeProjet = userService.findById(chefDeProjetId);
+                User chefDeProjet = userService.findByNom(chefDeProjetNom);
                 if (chefDeProjet == null || !chefDeProjet.getRole().equals(Role.CHEFDEPROJET)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Chef de projet non trouvé ou invalide.");
                 }
                 projet.setChefDeProjet(chefDeProjet);
-                projetService.ajouterProjetAvecAffectation(utilisateurConnecte, projet, chefDeProjetId, responsableQualiteId);
+                projetService.ajouterProjetAvecAffectation(utilisateurConnecte, projet, chefDeProjetNom, responsableQualiteNom);
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Utilisateur non autorisé.");
             }
@@ -85,5 +97,15 @@ public class ProjetController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié.");
         }
+    }
+
+    @GetMapping("/activites/{activiteId}/projets")
+    public ResponseEntity<List<Projet>> getProjetsByActivite(@PathVariable Long activiteId) {
+        Activite activite = activiteService.findById(activiteId);
+        if (activite == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        List<Projet> projets = projetService.findByActivite(activite);
+        return ResponseEntity.ok(projets);
     }
 }
