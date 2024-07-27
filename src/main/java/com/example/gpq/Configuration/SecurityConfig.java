@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/projet/ajouter").hasAnyRole("CHEFDEPROJET", "DIRECTEUR")
                 .requestMatchers("/api/phases/ajouter","/api/phases/updatePhase/{id}").hasAnyRole("CHEFDEPROJET")
                 .requestMatchers("/api/checklists/initialize").hasAnyRole("CHEFDEPROJET","RQUALITE")
-                .requestMatchers("/api/checklists/updateStatus/{checklistId}","/api/checklists/updateItems/{checklistId}").hasAnyRole("RQUALITE")
+                .requestMatchers("/api/checklists/**").hasAnyRole("RQUALITE")
 
                 .anyRequest().authenticated()
                 .and()

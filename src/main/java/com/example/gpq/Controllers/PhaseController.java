@@ -65,9 +65,11 @@ public class PhaseController {
             }
 
             for (Phase phase : phases) {
-                Phase savedPhase = phaseService.ajouterPhase(phase, projet);
-                if (savedPhase.getEtat() == EtatPhase.TERMINE) {
-                    checklistService.createChecklist(savedPhase); // Crée la checklist avec les items
+                try {
+                    Phase savedPhase = phaseService.ajouterPhase(phase, projet);
+                    // No need to create checklist here
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
                 }
             }
             return ResponseEntity.ok("Phases ajoutées avec succès.");
@@ -75,7 +77,6 @@ public class PhaseController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié.");
         }
     }
-
     @PutMapping("/updatePhase/{id}")
     @PreAuthorize("hasRole('CHEFDEPROJET')")
     public ResponseEntity<String> updatePhase(@PathVariable Long id, @RequestBody Phase phaseDetails) {

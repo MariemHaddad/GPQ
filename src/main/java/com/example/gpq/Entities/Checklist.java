@@ -2,6 +2,8 @@ package com.example.gpq.Entities;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,8 +28,8 @@ public class Checklist {
 
     private String remarque;
 
-    @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL)
-    private List<ChecklistItem> items;
+    @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChecklistItem> items = new ArrayList<>();
 
     // Ajoutez un constructeur si nécessaire
 }

@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +47,14 @@ public class ChecklistController {
         }
     }
 
+
     @PutMapping("/updateStatus/{checklistId}")
     @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<?> updateChecklistStatus(@PathVariable Long checklistId,
-                                                   @RequestParam StatusChecklist status,
-                                                   @RequestParam String remarque) {
+                                                   @RequestBody Map<String, Object> payload) {
         try {
+            StatusChecklist status = StatusChecklist.valueOf(payload.get("status").toString());
+            String remarque = payload.get("remarque").toString();
             checklistService.updateChecklistStatus(checklistId, status, remarque);
             return ResponseEntity.ok("Statut de la checklist mis à jour avec succès.");
         } catch (IllegalArgumentException e) {
@@ -59,18 +63,19 @@ public class ChecklistController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue lors de la mise à jour du statut de la checklist.");
         }
     }
-
     @PutMapping("/updateItems/{checklistId}")
     @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<?> updateChecklistItems(@PathVariable Long checklistId,
                                                   @RequestBody List<ChecklistItem> updatedItems) {
+        logger.debug("Updating checklist items for checklistId: {}", checklistId);
         try {
             checklistService.updateChecklistItems(checklistId, updatedItems);
             return ResponseEntity.ok("Items de la checklist mis à jour avec succès.");
         } catch (IllegalArgumentException e) {
+            logger.error("Error updating checklist items: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            logger.error("Unexpected error updating checklist items: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue lors de la mise à jour des items de la checklist.");
         }
-    }
-}
+    }}

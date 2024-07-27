@@ -11,4 +11,6 @@ public interface IPhaseService {
     Optional<Phase> findById(Long phaseId);
     List<Phase> getPhasesByProjet(Projet projet);
     Phase save(Phase phase); // Méthode pour sauvegarder une phase
+    void validatePhaseName(String phaseName); // Ajouter cette méthode
+
 }
