@@ -30,6 +30,7 @@ public class ChecklistController {
         this.checklistService = checklistService;
     }
 
+    // Méthode existante pour initialiser une checklist
     @PostMapping("/initialize")
     @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     public ResponseEntity<?> initializeChecklist(@RequestParam Long phaseId) {
@@ -47,6 +48,22 @@ public class ChecklistController {
         }
     }
 
+    // Nouvelle méthode pour récupérer une checklist par ID de phase
+    @GetMapping("/byPhase/{phaseId}")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
+    public ResponseEntity<?> getChecklistByPhaseId(@PathVariable Long phaseId) {
+        try {
+            Checklist checklist = checklistService.findByPhaseId(phaseId);
+            if (checklist != null) {
+                return ResponseEntity.ok(checklist);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Checklist not found for phase ID: " + phaseId);
+            }
+        } catch (Exception e) {
+            logger.error("Unexpected error retrieving checklist for phaseId: {}", phaseId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue lors de la récupération de la checklist.");
+        }
+    }
 
     @PutMapping("/updateStatus/{checklistId}")
     @PreAuthorize("hasRole('RQUALITE')")
@@ -63,6 +80,7 @@ public class ChecklistController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue lors de la mise à jour du statut de la checklist.");
         }
     }
+
     @PutMapping("/updateItems/{checklistId}")
     @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<?> updateChecklistItems(@PathVariable Long checklistId,
@@ -78,4 +96,5 @@ public class ChecklistController {
             logger.error("Unexpected error updating checklist items: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue lors de la mise à jour des items de la checklist.");
         }
-    }}
+    }
+}

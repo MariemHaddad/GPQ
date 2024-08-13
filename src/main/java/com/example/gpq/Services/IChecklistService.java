@@ -14,5 +14,5 @@ public interface IChecklistService {
     void updateChecklistItems(Long checklistId, List<ChecklistItem> updatedItems);
     Checklist initializeChecklist(Long phaseId);
 
-
+    Checklist findByPhaseId(Long phaseId); // Nouvelle méthode ajoutée
 }

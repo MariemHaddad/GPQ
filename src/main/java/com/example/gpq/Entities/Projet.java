@@ -1,6 +1,6 @@
 package com.example.gpq.Entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -12,8 +12,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"phases", "activite", "client", "users"})
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idP")
+
 public class Projet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,9 +29,9 @@ public class Projet {
     private String methodologie;
     private String objectifs;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     private TypeProjet typeprojet;
+
     private String responsableQualiteNom;
     private String chefDeProjetNom;
 
@@ -50,6 +52,10 @@ public class Projet {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Client client;
 
+    @OneToMany(mappedBy = "projet")
+    @JsonManagedReference
+    private List<Phase> phases;
+
     // Custom setters for names
     public void setChefDeProjet(User chefDeProjet) {
         this.chefDeProjet = chefDeProjet;
@@ -64,10 +70,4 @@ public class Projet {
             this.responsableQualiteNom = responsableQualite.getNom();
         }
     }
-
-    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL)
-    private List<Phase> phases;
-
-
-    // Additional getters and setters if needed
 }

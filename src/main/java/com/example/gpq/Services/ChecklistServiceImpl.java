@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
 
-
 @Service
 public class ChecklistServiceImpl implements IChecklistService {
     private static final Logger logger = LoggerFactory.getLogger(ChecklistServiceImpl.class);
@@ -29,10 +28,10 @@ public class ChecklistServiceImpl implements IChecklistService {
 
     @Override
     public Checklist initializeChecklist(Long phaseId) {
-        Phase phase = phaseRepository.findById(phaseId).orElseThrow(() -> new IllegalArgumentException("Invalid phase ID"));
+        Phase phase = phaseRepository.findById(phaseId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid phase ID"));
         return createChecklist(phase);
     }
-
 
     @Override
     public Checklist createChecklist(Phase phase) {
@@ -53,15 +52,16 @@ public class ChecklistServiceImpl implements IChecklistService {
         itemChecklistRepository.saveAll(items);
         return checklist;
     }
+
     @Override
     public void saveChecklist(Checklist checklist) {
         checklistRepository.save(checklist);
     }
 
-
     @Override
     public Checklist updateChecklistStatus(Long checklistId, StatusChecklist status, String remarque) {
-        Checklist checklist = checklistRepository.findById(checklistId).orElseThrow(() -> new IllegalArgumentException("Invalid checklist ID"));
+        Checklist checklist = checklistRepository.findById(checklistId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid checklist ID"));
         checklist.setStatus(status);
         checklist.setRemarque(remarque);
         return checklistRepository.save(checklist);
@@ -69,7 +69,8 @@ public class ChecklistServiceImpl implements IChecklistService {
 
     @Override
     public void updateChecklistItems(Long checklistId, List<ChecklistItem> updatedItems) {
-        Checklist checklist = checklistRepository.findById(checklistId).orElseThrow(() -> new IllegalArgumentException("Invalid checklist ID"));
+        Checklist checklist = checklistRepository.findById(checklistId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid checklist ID"));
         List<ChecklistItem> existingItems = checklist.getItems();
 
         for (ChecklistItem updatedItem : updatedItems) {
@@ -83,6 +84,12 @@ public class ChecklistServiceImpl implements IChecklistService {
         }
         itemChecklistRepository.saveAll(existingItems);
     }
+
+    @Override
+    public Checklist findByPhaseId(Long phaseId) {
+        return checklistRepository.findByPhaseIdPh(phaseId).orElse(null);
+    }
+
     private static final Map<String, List<String>> CHECKLIST_ITEMS_MAP = new HashMap<>();
     static {
         CHECKLIST_ITEMS_MAP.put("La conception préliminaire", Arrays.asList(

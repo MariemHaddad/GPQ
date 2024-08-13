@@ -1,5 +1,5 @@
 package com.example.gpq.Entities;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,25 +11,26 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "phase")
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idCh")
 public class Checklist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long idCh;
 
-    @OneToOne
-    @JoinColumn(name = "phase_id")
-    private Phase phase;
-
     @Enumerated(EnumType.STRING)
     private StatusChecklist status = StatusChecklist.EN_ATTENTE;
 
     private String remarque;
 
-    @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChecklistItem> items = new ArrayList<>();
+    @OneToOne
+    @JoinColumn(name = "phase_id")
+    @JsonBackReference
+    private Phase phase;
 
-    // Ajoutez un constructeur si nécessaire
+    @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<ChecklistItem> items;
 }

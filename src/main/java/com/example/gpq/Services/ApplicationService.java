@@ -25,7 +25,6 @@ public class ApplicationService {
         phase.setProjet(projet);
         return phaseRepository.save(phase);
     }
-
     public Optional<Phase> findPhaseById(Long id) {
         return phaseRepository.findById(id);
     }

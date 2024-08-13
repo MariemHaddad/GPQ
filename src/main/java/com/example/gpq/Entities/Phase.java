@@ -1,7 +1,9 @@
 package com.example.gpq.Entities;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.example.gpq.Configuration.PhaseDeserializer;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,11 +14,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"projet", "checklist"})
 @Builder
+@JsonDeserialize(using = PhaseDeserializer.class)
 public class Phase {
     @Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long idPh;
 
@@ -31,9 +34,11 @@ public class Phase {
     private EtatPhase etat = EtatPhase.EN_ATTENTE;
 
     @ManyToOne
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JoinColumn(name = "projet_id")
+    @JsonBackReference
     private Projet projet;
 
-    @OneToOne(mappedBy = "phase", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "phase", fetch = FetchType.LAZY)
+    @JsonManagedReference
     private Checklist checklist;
 }

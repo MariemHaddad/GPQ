@@ -10,58 +10,69 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 @Service
 public class PhaseServiceImpl implements IPhaseService {
     private static final Logger logger = LoggerFactory.getLogger(PhaseServiceImpl.class);
+
     private final PhaseRepository phaseRepository;
     private final IChecklistService checklistService;
-    private static final List<String> VALID_PHASE_NAMES = Arrays.asList(
-            "La conception préliminaire",
-            "Manuel d'utilisation",
-            "Tests unitaires",
-            "Le Plan d'Integration",
-            "Le Plan de Validation",
-            "Le Plan de Management (PM)",
-            "Code",
-            "Spécification",
-            "Conception détaillée"
-    );
 
     @Autowired
     public PhaseServiceImpl(PhaseRepository phaseRepository, @Lazy IChecklistService checklistService) {
         this.phaseRepository = phaseRepository;
         this.checklistService = checklistService; // @Lazy injection
     }
-
-    @Override
-    public void validatePhaseName(String phaseName) {
-        if (!VALID_PHASE_NAMES.contains(phaseName)) {
-            throw new IllegalArgumentException("Nom de phase invalide : " + phaseName);
-        }
-    }
+    private static final List<String> VALID_PHASE_NAMES = Arrays.asList(
+            "La conception préliminaire",
+            "La conception détaillée",
+            "La mise en œuvre",
+            "La vérification",
+            "La validation",
+            "Code"
+            // Add other valid phase names here
+    );
 
     @Override
     public Phase ajouterPhase(Phase phase, Projet projet) {
         validatePhaseName(phase.getDescription());
         phase.setProjet(projet);
+        phase.setEtat(EtatPhase.EN_COURS); // Set default state to EN_COURS
         Phase savedPhase = phaseRepository.save(phase);
 
-        // Initialize and save checklist only if necessary
-        if (savedPhase.getEtat() == EtatPhase.TERMINE) {
+        // Automatically create and associate a checklist if phase state is TERMINE
+        if (savedPhase.getEtat() == EtatPhase.TERMINE && savedPhase.getChecklist() == null) {
             Checklist checklist = checklistService.createChecklist(savedPhase);
-            checklistService.saveChecklist(checklist);
             savedPhase.setChecklist(checklist);
-            phaseRepository.save(savedPhase); // Ensure the phase is updated with the checklist
+            phaseRepository.save(savedPhase); // Save phase again to update checklist
         }
 
         return savedPhase;
     }
+
+    @Override
+    public Phase updatePhaseEtat(Long id, EtatPhase newEtat) {
+        Optional<Phase> phaseOpt = phaseRepository.findById(id);
+        if (phaseOpt.isEmpty()) {
+            throw new IllegalArgumentException("Phase non trouvée.");
+        }
+
+        Phase phase = phaseOpt.get();
+        phase.setEtat(newEtat);
+
+        if (newEtat == EtatPhase.TERMINE && phase.getChecklist() == null) {
+            Checklist checklist = checklistService.createChecklist(phase);
+            phase.setChecklist(checklist);
+        }
+
+        return phaseRepository.save(phase);
+    }
+
     @Override
     public Optional<Phase> findById(Long phaseId) {
         return phaseRepository.findById(phaseId);
@@ -74,13 +85,13 @@ public class PhaseServiceImpl implements IPhaseService {
 
     @Override
     public Phase save(Phase phase) {
-        // Ensure phase and its collections are properly initialized
-        if (phase.getChecklist() == null) {
-            phase.setChecklist(new Checklist());
-        }
-        if (phase.getChecklist().getItems() == null) {
-            phase.getChecklist().setItems(new ArrayList<>());
-        }
         return phaseRepository.save(phase);
+    }
+
+    @Override
+    public void validatePhaseName(String phaseName) {
+        if (!VALID_PHASE_NAMES.contains(phaseName)) {
+            throw new IllegalArgumentException("Nom de phase invalide : " + phaseName);
+        }
     }
 }

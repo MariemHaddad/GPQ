@@ -24,8 +24,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/authentication/register", "/api/authentication/authenticate","/activites/getActivities").permitAll()
                 .requestMatchers("/api/authentication/change-account-status","/api/authentication/pending-users","/activites/modifier/{id}","/activites/supprimer/{id}","/activites/ajouter").hasRole("ADMIN")
                 .requestMatchers("/api/projet/ajouter").hasAnyRole("CHEFDEPROJET", "DIRECTEUR")
-                .requestMatchers("/api/phases/ajouter","/api/phases/updatePhase/{id}").hasAnyRole("CHEFDEPROJET")
-                .requestMatchers("/api/checklists/initialize").hasAnyRole("CHEFDEPROJET","RQUALITE")
+                .requestMatchers("/api/phases/ajouterPhases","/api/phases/updatePhase/{id}","").hasAnyRole("CHEFDEPROJET")
+                .requestMatchers("/api/checklists/initialize","/api/phases/projet/{projetId}","/api/checklists/byPhase/{phaseId}").hasAnyRole("CHEFDEPROJET","RQUALITE")
                 .requestMatchers("/api/checklists/**").hasAnyRole("RQUALITE")
 
                 .anyRequest().authenticated()
