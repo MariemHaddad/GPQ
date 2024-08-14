@@ -4,6 +4,7 @@ import com.example.gpq.Entities.*;
 import com.example.gpq.Repositories.ChecklistRepository;
 import com.example.gpq.Repositories.ItemChecklistRepository;
 import com.example.gpq.Repositories.PhaseRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

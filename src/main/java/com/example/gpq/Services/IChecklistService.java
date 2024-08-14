@@ -8,11 +8,18 @@ import com.example.gpq.Entities.StatusChecklist;
 import java.util.List;
 
 public interface IChecklistService {
-    Checklist createChecklist(Phase phase); // Remplacez saveChecklist par createChecklist
-    void saveChecklist(Checklist checklist); // Ajoutez cette méthode
+    Checklist createChecklist(Phase phase);
+
+    void saveChecklist(Checklist checklist);
+
     Checklist updateChecklistStatus(Long checklistId, StatusChecklist status, String remarque);
+
     void updateChecklistItems(Long checklistId, List<ChecklistItem> updatedItems);
+
     Checklist initializeChecklist(Long phaseId);
 
-    Checklist findByPhaseId(Long phaseId); // Nouvelle méthode ajoutée
+
+    Checklist findByPhaseId(Long phaseId);
+
+    // Ajoutez cette méthode pour trouver une checklist par son ID
 }
