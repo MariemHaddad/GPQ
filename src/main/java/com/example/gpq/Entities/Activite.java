@@ -1,9 +1,8 @@
 package com.example.gpq.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
@@ -21,6 +20,7 @@ public class Activite {
     private Long idA;
     private String nomA;
     @OneToMany(mappedBy = "activite",cascade = CascadeType.REMOVE)
+    @JsonIgnore
     private List<Projet> projet;
 
 }

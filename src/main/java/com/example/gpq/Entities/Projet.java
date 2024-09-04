@@ -3,7 +3,7 @@ package com.example.gpq.Entities;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
+
 
 import java.util.Date;
 import java.util.List;

@@ -21,12 +21,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/authentication/register", "/api/authentication/authenticate","/activites/getActivities").permitAll()
+                .requestMatchers("/api/authentication/register", "/api/authentication/authenticate","/activites/getActivities","/api/analyseCausale/byChecklist/{checklistId}").permitAll()
                 .requestMatchers("/api/authentication/change-account-status","/api/authentication/pending-users","/activites/modifier/{id}","/activites/supprimer/{id}","/activites/ajouter").hasRole("ADMIN")
                 .requestMatchers("/api/projet/ajouter").hasAnyRole("CHEFDEPROJET", "DIRECTEUR")
                 .requestMatchers("/api/phases/ajouterPhases","/api/phases/updatePhase/{id}","").hasAnyRole("CHEFDEPROJET")
                 .requestMatchers("/api/checklists/initialize","/api/phases/projet/{projetId}","/api/checklists/byPhase/{phaseId}").hasAnyRole("CHEFDEPROJET","RQUALITE")
-                .requestMatchers("/api/checklists/**").hasAnyRole("RQUALITE")
+                .requestMatchers("/api/checklists/**","/api/analyseCausale/add","/api/analyseCausale/{id}/addPourquoi", "/api/analyseCausale/{id}/addCauseIshikawa").hasRole("RQUALITE")
 
                 .anyRequest().authenticated()
                 .and()

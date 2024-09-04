@@ -3,9 +3,8 @@ import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
+import java.util.List;
 @Entity
 @Getter
 @Setter
@@ -27,10 +26,13 @@ public class Checklist {
 
     @OneToOne
     @JoinColumn(name = "phase_id")
-    @JsonBackReference
+    @JsonBackReference("checklist-phase")
     private Phase phase;
-
     @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("checklist-items")
     private List<ChecklistItem> items;
+
+    @OneToOne(mappedBy = "checklist", cascade = CascadeType.ALL)
+    @JsonBackReference("checklist-analyse")
+    private AnalyseCausale analyseCausale;
 }

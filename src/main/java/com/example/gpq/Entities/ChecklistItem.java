@@ -21,7 +21,7 @@ public class ChecklistItem {
 
     @ManyToOne
     @JoinColumn(name = "checklist_id")
-    @JsonBackReference
+    @JsonBackReference("checklist-items")
     private Checklist checklist;
 
     private String resultat;

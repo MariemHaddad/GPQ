@@ -1,5 +1,6 @@
 package com.example.gpq.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,5 +20,6 @@ public class Client {
     private Long idC;
     private String nomC;
     @OneToMany(mappedBy = "client",cascade = CascadeType.REMOVE)
+    @JsonIgnore
     private List<Projet> projet;
 }

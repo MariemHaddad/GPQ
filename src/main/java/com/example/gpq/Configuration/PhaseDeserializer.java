@@ -1,11 +1,7 @@
 package com.example.gpq.Configuration;
 
-import com.example.gpq.Entities.Checklist;
-import com.example.gpq.Entities.EtatPhase;
 import com.example.gpq.Entities.Phase;
-import com.example.gpq.Entities.StatusChecklist;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;

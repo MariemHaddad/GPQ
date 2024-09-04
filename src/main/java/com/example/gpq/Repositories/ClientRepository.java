@@ -1,6 +1,6 @@
 package com.example.gpq.Repositories;
 
-import com.example.gpq.Entities.Activite;
+
 import com.example.gpq.Entities.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 
