@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/projet/ajouter").hasAnyRole("CHEFDEPROJET", "DIRECTEUR")
                 .requestMatchers("/api/phases/ajouterPhases","/api/phases/updatePhase/{id}","").hasAnyRole("CHEFDEPROJET")
                 .requestMatchers("/api/checklists/initialize","/api/phases/projet/{projetId}","/api/checklists/byPhase/{phaseId}").hasAnyRole("CHEFDEPROJET","RQUALITE")
-                .requestMatchers("/api/checklists/**","/api/analyseCausale/add","/api/analyseCausale/{id}/addPourquoi", "/api/analyseCausale/{id}/addCauseIshikawa").hasRole("RQUALITE")
+                .requestMatchers("/api/checklists/**","/api/analyseCausale/add","/api/analyseCausale/{id}/addPourquoi", "/api/analyseCausale/{id}/addCauseIshikawa","/api/planAction/**").hasRole("RQUALITE")
 
                 .anyRequest().authenticated()
                 .and()

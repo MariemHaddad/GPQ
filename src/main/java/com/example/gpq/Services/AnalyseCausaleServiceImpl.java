@@ -1,18 +1,16 @@
 package com.example.gpq.Services;
 
-import com.example.gpq.Entities.AnalyseCausale;
-import com.example.gpq.Entities.Checklist;
-import com.example.gpq.Entities.Pourquoi;
-import com.example.gpq.Entities.CauseIshikawa;
-import com.example.gpq.Repositories.AnalyseCausaleRepository;
-import com.example.gpq.Repositories.ChecklistRepository;
-import com.example.gpq.Repositories.PourquoiRepository;
-import com.example.gpq.Repositories.CauseIshikawaRepository;
+import com.example.gpq.Entities.*;
+import com.example.gpq.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,12 +25,41 @@ public class AnalyseCausaleServiceImpl implements IAnalyseCausaleService {
 
     @Autowired
     private CauseIshikawaRepository causeIshikawaRepository;
+    @Autowired
+    private PlanActionRepository planActionRepository;
 
-    @Override
-    @Transactional
-    public AnalyseCausale saveAnalyseCausale(AnalyseCausale analyseCausale) {
-        return analyseCausaleRepository.save(analyseCausale);
+    public void saveAnalyseCausale(AnalyseCausale analyseCausale) {
+        // Sauvegarder l'analyse causale
+        AnalyseCausale savedAnalyseCausale = analyseCausaleRepository.save(analyseCausale);
+
+        // Créer un PlanAction associé
+        PlanAction planAction = new PlanAction();
+        planAction.setAnalyseCausale(analyseCausale);
+
+        // Ajouter les actions au plan d'action
+        List<Action> actions = analyseCausale.getCausesIshikawa().stream()
+                .map(cause -> {
+                    Action action = new Action();
+                    action.setDescription(cause.getAction()); // Description de l'action est le champ "action" dans la cause
+                    action.setType(null); // Utilisation de l'énumération CategorieIshikawa
+                    // Laisser les autres champs pour mise à jour ultérieure
+                    action.setResponsable(null);
+                    action.setDatePlanification(null);
+                    action.setDateRealisation(null);
+                    action.setCritereEfficacite(null);
+                    action.setEfficace(null);
+                    action.setCommentaire(null);
+                    action.setPlanAction(planAction); // Associe l'action au plan d'action
+                    return action;
+                })
+                .collect(Collectors.toList());
+
+        planAction.setActions(actions);
+
+        // Sauvegarder le plan d'action avec les actions associées
+        planActionRepository.save(planAction);
     }
+
     @Override
     public Checklist getChecklistById(Long id) {
         return checklistRepository.findById(id).orElse(null);

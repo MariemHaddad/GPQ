@@ -24,10 +24,7 @@ public class AnalyseCausaleController {
             @RequestParam Long checklistId,
             @RequestBody AnalyseCausale analyseCausale) {
 
-        // Log the incoming data
-        System.out.println("Received AnalyseCausale: " + analyseCausale);
-
-        // Rechercher la checklist par son ID
+        // Rechercher la checklist
         Checklist checklist = analyseCausaleService.getChecklistById(checklistId);
         if (checklist == null) {
             return ResponseEntity.badRequest().body("Checklist avec l'ID spécifié n'existe pas.");
@@ -38,10 +35,9 @@ public class AnalyseCausaleController {
             return ResponseEntity.badRequest().body("L'analyse causale ne peut être ajoutée que lorsque le statut de la checklist est REFUSE.");
         }
 
-        // Assigner la checklist à l'analyse causale
         analyseCausale.setChecklist(checklist);
 
-        // Valider les autres conditions
+        // Valider les conditions
         if (analyseCausale.getMethodeAnalyse() == MethodeAnalyse.FIVE_WHYS &&
                 (analyseCausale.getCinqPourquoi() == null || analyseCausale.getCinqPourquoi().isEmpty())) {
             return ResponseEntity.badRequest().body("Le modèle Five Whys nécessite d'ajouter les 5 Pourquoi.");
@@ -52,16 +48,10 @@ public class AnalyseCausaleController {
             return ResponseEntity.badRequest().body("Le modèle Ishikawa nécessite de remplir le diagramme Ishikawa.");
         }
 
-        // Assigner la liste de Pourquoi à l'AnalyseCausale
-        if (analyseCausale.getCinqPourquoi() != null) {
-            for (Pourquoi pourquoi : analyseCausale.getCinqPourquoi()) {
-                pourquoi.setAnalyseCausale(analyseCausale);
-            }
-        }
+        // Sauvegarder l'analyse causale et créer les actions automatiquement
+        analyseCausaleService.saveAnalyseCausale(analyseCausale);
 
-        AnalyseCausale savedAnalyse = analyseCausaleService.saveAnalyseCausale(analyseCausale);
-        return ResponseEntity.ok("Analyse causale ajoutée avec succès.");
-
+        return ResponseEntity.ok("Analyse causale et plan d'action ajoutés avec succès.");
     }
     @GetMapping("/byChecklist/{checklistId}")
     public ResponseEntity<AnalyseCausale> getAnalyseCausaleByChecklist(@PathVariable Long checklistId) {

@@ -8,7 +8,7 @@ import com.example.gpq.Entities.CauseIshikawa;
 import java.util.List;
 
 public interface IAnalyseCausaleService {
-    AnalyseCausale saveAnalyseCausale(AnalyseCausale analyseCausale);
+    void saveAnalyseCausale(AnalyseCausale analyseCausale);
     Checklist getChecklistById(Long id);
     AnalyseCausale getAnalyseCausaleById(Long id);
     List<AnalyseCausale> getAllAnalysesCausales();

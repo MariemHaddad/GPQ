@@ -41,6 +41,9 @@ public class AnalyseCausale {
     @OneToMany(mappedBy = "analyseCausale", cascade = CascadeType.ALL)
     @JsonManagedReference("analyse-causesIshikawa")
     private List<CauseIshikawa> causesIshikawa;
+    @OneToOne(mappedBy = "analyseCausale", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("analyse-planActions")
+    private PlanAction planAction;
     @Override
     public String toString() {
         return "AnalyseCausale{" +
