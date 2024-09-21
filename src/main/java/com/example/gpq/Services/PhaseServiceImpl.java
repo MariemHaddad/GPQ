@@ -52,7 +52,10 @@ public class PhaseServiceImpl implements IPhaseService {
 
         return savedPhase;
     }
-
+    @Override
+    public void deletePhase(Long id) {
+        phaseRepository.deleteById(id);
+    }
     @Override
     public Phase updatePhaseEtat(Long id, EtatPhase newEtat) {
         Optional<Phase> phaseOpt = phaseRepository.findById(id);
@@ -92,4 +95,31 @@ public class PhaseServiceImpl implements IPhaseService {
             throw new IllegalArgumentException("Nom de phase invalide : " + phaseName);
         }
     }
+    @Override
+    public double calculerEffortVariance(Long phaseId) {
+        Optional<Phase> optionalPhase = phaseRepository.findById(phaseId);
+        if (optionalPhase.isPresent()) {
+            Phase phase = optionalPhase.get();
+            if (phase.getEffortActuel() != null && phase.getEffortPlanifie() != null && phase.getEffortActuel() != 0) {
+                return (phase.getEffortActuel() - phase.getEffortPlanifie()) / phase.getEffortActuel();
+            }
+        }
+        return 0; // Gérer les cas où les valeurs sont nulles ou la phase introuvable
+    }
+
+    // Implémentation de la méthode pour calculer le schedule variance
+    @Override
+    public double calculerScheduleVariance(Long phaseId) {
+        Optional<Phase> optionalPhase = phaseRepository.findById(phaseId);
+        if (optionalPhase.isPresent()) {
+            Phase phase = optionalPhase.get();
+            if (phase.getPlannedStartDate() != null && phase.getPlannedEndDate() != null && phase.getEffectiveEndDate() != null) {
+                long plannedDuration = phase.getPlannedEndDate().getTime() - phase.getPlannedStartDate().getTime();
+                long effectiveDuration = phase.getEffectiveEndDate().getTime() - phase.getPlannedEndDate().getTime();
+                return (double) effectiveDuration / plannedDuration;
+            }
+        }
+        return 0; // Gérer les cas où les dates sont nulles ou la phase introuvable
+    }
+
 }

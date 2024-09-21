@@ -35,7 +35,25 @@ public class PhaseController {
         this.checklistService = checklistService;
         this.phaseService = phaseService;
     }
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('CHEFDEPROJET')")
+    public ResponseEntity<String> deletePhase(@PathVariable Long id) {
+        Optional<Phase> phaseOpt = phaseService.findById(id);
+        if (phaseOpt.isEmpty()) {
+            logger.error("Phase not found with ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Phase non trouvée.");
+        }
 
+        Phase phase = phaseOpt.get();
+
+        // Supprimez la checklist associée
+        checklistService.deleteChecklistByPhase(phase);
+
+        // Supprimez la phase
+        phaseService.deletePhase(id);
+        logger.info("Phase deleted with ID: " + id);
+        return ResponseEntity.ok("{\"message\":\"Phase supprimée avec succès.\"}");
+    }
     @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     @GetMapping("/projet/{projetId}")
     public ResponseEntity<List<Phase>> getPhasesByProjet(@PathVariable Long projetId) {
@@ -132,7 +150,14 @@ public class PhaseController {
         phase.setPlannedEndDate(phaseDetails.getPlannedEndDate());
         phase.setEffectiveStartDate(phaseDetails.getEffectiveStartDate());
         phase.setEffectiveEndDate(phaseDetails.getEffectiveEndDate());
-        phase.setEtat(phaseDetails.getEtat());
+
+        // Vérifie les valeurs d'effort avant de les mettre à jour
+        if (phaseDetails.getEffortActuel() != null) {
+            phase.setEffortActuel(phaseDetails.getEffortActuel());
+        }
+        if (phaseDetails.getEffortPlanifie() != null) {
+            phase.setEffortPlanifie(phaseDetails.getEffortPlanifie());
+        }
 
         if (phaseDetails.getEtat() == EtatPhase.TERMINE && phase.getChecklist() == null) {
             Checklist checklist = checklistService.createChecklist(phase);
@@ -145,4 +170,17 @@ public class PhaseController {
         logger.info("Phase updated for ID: " + id);
         return ResponseEntity.ok("Phase mise à jour avec succès.");
     }
+    @GetMapping("/{phaseId}/effortVariance")
+    public ResponseEntity<Double> getEffortVariance(@PathVariable Long phaseId) {
+        double effortVariance = phaseService.calculerEffortVariance(phaseId);  // Appel de la méthode via l'interface
+        return ResponseEntity.ok(effortVariance);
+    }
+
+    // Endpoint pour calculer le schedule variance
+    @GetMapping("/{phaseId}/scheduleVariance")
+    public ResponseEntity<Double> getScheduleVariance(@PathVariable Long phaseId) {
+        double scheduleVariance = phaseService.calculerScheduleVariance(phaseId);  // Appel de la méthode via l'interface
+        return ResponseEntity.ok(scheduleVariance);
+    }
+
 }

@@ -31,7 +31,12 @@ public class ChecklistServiceImpl implements IChecklistService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid phase ID"));
         return createChecklist(phase);
     }
-
+    @Override
+    public void deleteChecklistByPhase(Phase phase) {
+        if (phase.getChecklist() != null) {
+            checklistRepository.deleteById(phase.getChecklist().getIdCh());
+        }
+    }
     @Override
     public Checklist createChecklist(Phase phase) {
         Checklist checklist = new Checklist();

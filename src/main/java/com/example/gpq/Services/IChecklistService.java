@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface IChecklistService {
     Checklist createChecklist(Phase phase);
-
+    void deleteChecklistByPhase(Phase phase);
     void saveChecklist(Checklist checklist);
 
     Checklist updateChecklistStatus(Long checklistId, StatusChecklist status, String remarque);

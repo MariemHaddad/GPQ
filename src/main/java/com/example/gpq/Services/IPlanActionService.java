@@ -11,7 +11,7 @@ public interface IPlanActionService {
     List<PlanAction> getAllPlansAction(); // Récupérer tous les plans d'action
     PlanAction updatePlanAction(Long id, PlanAction planActionDetails); // Mettre à jour un plan d'action
     void deletePlanAction(Long id); // Supprimer un plan d'action par ID
-
+    PlanAction getPlanActionByAnalyseCausaleId(Long idAN);
     // Méthodes pour Action
     Action saveAction(Action action); // Ajouter ou mettre à jour une action
     Action getActionById(Long id); // Récupérer une action par ID

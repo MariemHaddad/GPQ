@@ -91,5 +91,10 @@ public class PlanActionServiceImpl implements IPlanActionService {
     public void deleteAction(Long id) {
         actionRepository.deleteById(id);
     }
+    @Override
+    public PlanAction getPlanActionByAnalyseCausaleId(Long idAN) {
+        // Supposons que vous avez une méthode dans le repository pour trouver par analyse causale
+        return planActionRepository.findByAnalyseCausaleIdAN(idAN);
+    }
 }
 
