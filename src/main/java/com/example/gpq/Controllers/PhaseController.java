@@ -138,38 +138,71 @@ public class PhaseController {
     @PreAuthorize("hasRole('CHEFDEPROJET')")
     public ResponseEntity<String> updatePhase(@PathVariable Long id, @RequestBody Phase phaseDetails) {
         Optional<Phase> phaseOpt = phaseService.findById(id);
+
+        // Log de la recherche de la phase
         if (phaseOpt.isEmpty()) {
             logger.error("Phase not found with ID: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Phase non trouvée.");
         }
 
         Phase phase = phaseOpt.get();
+
+        // Log des informations de la phase avant la mise à jour
+        logger.info("Phase avant mise à jour pour ID: " + id);
+        logger.info("Effort Actuel: " + phase.getEffortActuel());
+        logger.info("Effort Planifié: " + phase.getEffortPlanifie());
+
+        // Mise à jour des champs de la phase
         phase.setDescription(phaseDetails.getDescription());
         phase.setObjectifs(phaseDetails.getObjectifs());
         phase.setPlannedStartDate(phaseDetails.getPlannedStartDate());
         phase.setPlannedEndDate(phaseDetails.getPlannedEndDate());
-        phase.setEffectiveStartDate(phaseDetails.getEffectiveStartDate());
-        phase.setEffectiveEndDate(phaseDetails.getEffectiveEndDate());
 
-        // Vérifie les valeurs d'effort avant de les mettre à jour
+        // Vérifie et met à jour les efforts
         if (phaseDetails.getEffortActuel() != null) {
             phase.setEffortActuel(phaseDetails.getEffortActuel());
-        }
-        if (phaseDetails.getEffortPlanifie() != null) {
-            phase.setEffortPlanifie(phaseDetails.getEffortPlanifie());
+        } else {
+            logger.warn("Effort Actuel non fourni dans phaseDetails, il restera inchangé.");
         }
 
+        if (phaseDetails.getEffortPlanifie() != null) {
+            phase.setEffortPlanifie(phaseDetails.getEffortPlanifie());
+        } else {
+            logger.warn("Effort Planifié non fourni dans phaseDetails, il restera inchangé.");
+        }
+
+        logger.info("PhaseDetails reçue: " + phaseDetails);
+        logger.info("Détails de la phase reçus: Effort Actuel: " + phaseDetails.getEffortActuel() + ", Effort Planifié: " + phaseDetails.getEffortPlanifie());
+
+        // Log des nouvelles valeurs avant la sauvegarde
+        logger.info("Phase mise à jour pour ID: " + id + " avant la sauvegarde.");
+        logger.info("Nouvel Effort Actuel: " + phase.getEffortActuel());
+        logger.info("Nouvel Effort Planifié: " + phase.getEffortPlanifie());
+
+        // Mise à jour de l'état et ajout de la checklist si nécessaire
         if (phaseDetails.getEtat() == EtatPhase.TERMINE && phase.getChecklist() == null) {
             Checklist checklist = checklistService.createChecklist(phase);
             phase.setChecklist(checklist);
-            phaseService.save(phase);
-        } else {
-            phaseService.save(phase);
         }
 
-        logger.info("Phase updated for ID: " + id);
+        // Sauvegarder la phase
+        phaseService.save(phase);
+
+        // Log après la mise à jour réussie
+        logger.info("Phase mise à jour avec succès pour ID: " + id);
+        logger.info("Effort Actuel après sauvegarde: " + phase.getEffortActuel());
+        logger.info("Effort Planifié après sauvegarde: " + phase.getEffortPlanifie());
+
+        // Vérification après sauvegarde
+        Phase updatedPhase = phaseService.findById(id).orElse(null);
+        if (updatedPhase != null) {
+            logger.info("Updated Effort Actuel: " + updatedPhase.getEffortActuel());
+            logger.info("Updated Effort Planifié: " + updatedPhase.getEffortPlanifie());
+        }
+
         return ResponseEntity.ok("Phase mise à jour avec succès.");
     }
+
     @GetMapping("/{phaseId}/effortVariance")
     public ResponseEntity<Double> getEffortVariance(@PathVariable Long phaseId) {
         double effortVariance = phaseService.calculerEffortVariance(phaseId);  // Appel de la méthode via l'interface

@@ -29,8 +29,6 @@ public class PhaseDeserializer extends JsonDeserializer<Phase> {
             phase.setDescription(descriptionNode.asText());
         }
 
-
-
         JsonNode objectifsNode = node.get("objectifs");
         if (objectifsNode != null && !objectifsNode.isNull()) {
             phase.setObjectifs(objectifsNode.asText());
@@ -56,6 +54,16 @@ public class PhaseDeserializer extends JsonDeserializer<Phase> {
             phase.setEffectiveEndDate(mapper.treeToValue(effectiveEndDateNode, Date.class));
         }
 
+        // Ajouter la désérialisation des champs effortActuel et effortPlanifie
+        JsonNode effortActuelNode = node.get("effortActuel");
+        if (effortActuelNode != null && !effortActuelNode.isNull()) {
+            phase.setEffortActuel(effortActuelNode.asDouble());
+        }
+
+        JsonNode effortPlanifieNode = node.get("effortPlanifie");
+        if (effortPlanifieNode != null && !effortPlanifieNode.isNull()) {
+            phase.setEffortPlanifie(effortPlanifieNode.asDouble());
+        }
 
         return phase;
     }

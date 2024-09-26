@@ -29,8 +29,8 @@ public class Phase {
     private Date plannedEndDate;
     private Date effectiveStartDate;
     private Date effectiveEndDate;
-    private Double effortPlanifie; // Effort planifié en jours
     private Double effortActuel;
+    private Double effortPlanifie;
     @Enumerated(EnumType.STRING)
     private EtatPhase etat = EtatPhase.EN_ATTENTE;
 
@@ -42,4 +42,5 @@ public class Phase {
     @OneToOne(mappedBy = "phase", fetch = FetchType.LAZY)
     @JsonManagedReference
     private Checklist checklist;
+
 }
