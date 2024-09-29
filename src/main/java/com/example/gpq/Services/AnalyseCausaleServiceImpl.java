@@ -34,7 +34,7 @@ public class AnalyseCausaleServiceImpl implements IAnalyseCausaleService {
 
         // Créer un PlanAction associé
         PlanAction planAction = new PlanAction();
-        planAction.setAnalyseCausale(analyseCausale);
+        planAction.setAnalyseCausale(savedAnalyseCausale);
 
         // Ajouter les actions au plan d'action
         List<Action> actions = analyseCausale.getCausesIshikawa().stream()

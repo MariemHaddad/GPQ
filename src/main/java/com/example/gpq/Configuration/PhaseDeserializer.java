@@ -1,5 +1,6 @@
 package com.example.gpq.Configuration;
 
+import com.example.gpq.Entities.EtatPhase;
 import com.example.gpq.Entities.Phase;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -54,7 +55,6 @@ public class PhaseDeserializer extends JsonDeserializer<Phase> {
             phase.setEffectiveEndDate(mapper.treeToValue(effectiveEndDateNode, Date.class));
         }
 
-        // Ajouter la désérialisation des champs effortActuel et effortPlanifie
         JsonNode effortActuelNode = node.get("effortActuel");
         if (effortActuelNode != null && !effortActuelNode.isNull()) {
             phase.setEffortActuel(effortActuelNode.asDouble());
@@ -64,6 +64,20 @@ public class PhaseDeserializer extends JsonDeserializer<Phase> {
         if (effortPlanifieNode != null && !effortPlanifieNode.isNull()) {
             phase.setEffortPlanifie(effortPlanifieNode.asDouble());
         }
+
+        // Désérialisation du champ EtatPhase
+        JsonNode etatNode = node.get("etat");
+        if (etatNode != null && !etatNode.isNull()) {
+            String etatValue = etatNode.asText().toUpperCase();
+            try {
+                phase.setEtat(EtatPhase.valueOf(etatValue));
+            } catch (IllegalArgumentException e) {
+                throw new IOException("Valeur invalide pour EtatPhase : " + etatValue, e);
+            }
+        } else {
+            phase.setEtat(EtatPhase.EN_ATTENTE); // Valeur par défaut si aucune n'est fournie
+        }
+
 
         return phase;
     }

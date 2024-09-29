@@ -20,10 +20,9 @@ public class PlanActionServiceImpl implements IPlanActionService {
     private ActionRepository actionRepository;
 
     @Override
-    public PlanAction savePlanAction(PlanAction planAction) {
-        return planActionRepository.save(planAction);
+    public List<PlanAction> savePlanActions(List<PlanAction> planActions) {
+        return planActionRepository.saveAll(planActions); // Utilisez saveAll() pour sauvegarder une liste
     }
-
     @Override
     public PlanAction getPlanActionById(Long id) {
         return planActionRepository.findById(id).orElse(null);

@@ -120,20 +120,28 @@ public class PhaseController {
         }
 
         Phase phase = phaseOpt.get();
-        phase.setEtat(newEtat);
 
-        if (newEtat == EtatPhase.TERMINE && phase.getChecklist() == null) {
-            Checklist checklist = checklistService.createChecklist(phase);
-            phase.setChecklist(checklist);
-            phaseService.save(phase);
-        } else {
-            phaseService.save(phase);
+        logger.info("Received EtatPhase value: " + newEtat); // Debugging line
+
+        // Vérifier si l'état est valide
+        try {
+            phase.setEtat(newEtat);
+
+            if (newEtat == EtatPhase.TERMINE && phase.getChecklist() == null) {
+                Checklist checklist = checklistService.createChecklist(phase);
+                phase.setChecklist(checklist);
+                phaseService.save(phase);
+            } else {
+                phaseService.save(phase);
+            }
+
+            logger.info("Phase state updated for ID: " + id);
+            return ResponseEntity.ok("État de la phase mis à jour avec succès.");
+        } catch (Exception e) {
+            logger.error("Error updating phase state: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Erreur lors de la mise à jour de l'état de la phase.");
         }
-
-        logger.info("Phase state updated for ID: " + id);
-        return ResponseEntity.ok("État de la phase mis à jour avec succès.");
     }
-
     @PutMapping("/updatePhase/{id}")
     @PreAuthorize("hasRole('CHEFDEPROJET')")
     public ResponseEntity<String> updatePhase(@PathVariable Long id, @RequestBody Phase phaseDetails) {

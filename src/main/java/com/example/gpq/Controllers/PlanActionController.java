@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/planAction")
@@ -25,12 +25,10 @@ public class PlanActionController {
     // Créer ou mettre à jour un plan d'action (automatique ou initial)
     @PostMapping("/add")
     @PreAuthorize("hasRole('RQUALITE')")
-    public ResponseEntity<PlanAction> ajouterPlanAction(@RequestBody PlanAction planAction) {
-        // Assurez-vous que les données sont correctes avant de sauvegarder
-        PlanAction savedPlanAction = planActionService.savePlanAction(planAction);
-        return ResponseEntity.ok(savedPlanAction);
+    public ResponseEntity<List<PlanAction>> ajouterPlanActions(@RequestBody List<PlanAction> planActions) {
+        List<PlanAction> savedPlanActions = planActionService.savePlanActions(planActions);
+        return ResponseEntity.ok(savedPlanActions);
     }
-
     // Récupérer un plan d'action par ID
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('RQUALITE')")
@@ -56,7 +54,6 @@ public class PlanActionController {
         return ResponseEntity.ok(updatedPlanAction);
     }
     @GetMapping("/analyseCausale/{idAN}/planAction")
-    @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<PlanAction> getPlanActionByAnalyseCausaleId(@PathVariable Long idAN) {
         PlanAction planAction = planActionService.getPlanActionByAnalyseCausaleId(idAN);
         if (planAction == null) {

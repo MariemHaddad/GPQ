@@ -6,7 +6,7 @@ import com.example.gpq.Entities.PlanAction;
 import java.util.List;
 
 public interface IPlanActionService {
-    PlanAction savePlanAction(PlanAction planAction); // Ajouter ou mettre à jour un plan d'action
+    List<PlanAction> savePlanActions(List<PlanAction> planActions);// Ajouter ou mettre à jour un plan d'action
     PlanAction getPlanActionById(Long id); // Récupérer un plan d'action par ID
     List<PlanAction> getAllPlansAction(); // Récupérer tous les plans d'action
     PlanAction updatePlanAction(Long id, PlanAction planActionDetails); // Mettre à jour un plan d'action
