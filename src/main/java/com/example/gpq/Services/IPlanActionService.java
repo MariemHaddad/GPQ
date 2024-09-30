@@ -16,6 +16,6 @@ public interface IPlanActionService {
     Action saveAction(Action action); // Ajouter ou mettre à jour une action
     Action getActionById(Long id); // Récupérer une action par ID
     List<Action> getAllActions(); // Récupérer toutes les actions
-    Action updateAction(Long id, Action actionDetails); // Mettre à jour une action
+    Action updateAction(Long id, Action actionDetails);
     void deleteAction(Long id); // Supprimer une action par ID
 }

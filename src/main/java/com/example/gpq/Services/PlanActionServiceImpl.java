@@ -7,6 +7,7 @@ import com.example.gpq.Repositories.PlanActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,19 +74,35 @@ public class PlanActionServiceImpl implements IPlanActionService {
         Optional<Action> actionOptional = actionRepository.findById(id);
         if (actionOptional.isPresent()) {
             Action action = actionOptional.get();
-            if (actionDetails.getDescription() != null) action.setDescription(actionDetails.getDescription());
-            if (actionDetails.getType() != null) action.setType(actionDetails.getType());
-            if (actionDetails.getResponsable() != null) action.setResponsable(actionDetails.getResponsable());
-            if (actionDetails.getDatePlanification() != null) action.setDatePlanification(actionDetails.getDatePlanification());
-            if (actionDetails.getDateRealisation() != null) action.setDateRealisation(actionDetails.getDateRealisation());
-            if (actionDetails.getCritereEfficacite() != null) action.setCritereEfficacite(actionDetails.getCritereEfficacite());
-            if (actionDetails.getEfficace() != null) action.setEfficace(actionDetails.getEfficace());
-            if (actionDetails.getCommentaire() != null) action.setCommentaire(actionDetails.getCommentaire());
+            // Update the fields of the action based on actionDetails
+            if (actionDetails.getDescription() != null) {
+                action.setDescription(actionDetails.getDescription());
+            }
+            if (actionDetails.getType() != null) {
+                action.setType(actionDetails.getType());
+            }
+            if (actionDetails.getResponsable() != null) {
+                action.setResponsable(actionDetails.getResponsable());
+            }
+            if (actionDetails.getDatePlanification() != null) {
+                action.setDatePlanification(actionDetails.getDatePlanification());
+            }
+            if (actionDetails.getDateRealisation() != null) {
+                action.setDateRealisation(actionDetails.getDateRealisation());
+            }
+            if (actionDetails.getCritereEfficacite() != null) {
+                action.setCritereEfficacite(actionDetails.getCritereEfficacite());
+            }
+            if (actionDetails.getEfficace() != null) {
+                action.setEfficace(actionDetails.getEfficace());
+            }
+            if (actionDetails.getCommentaire() != null) {
+                action.setCommentaire(actionDetails.getCommentaire());
+            }
             return actionRepository.save(action);
         }
-        return null;
+        return null; // If the action ID is not found
     }
-
     @Override
     public void deleteAction(Long id) {
         actionRepository.deleteById(id);

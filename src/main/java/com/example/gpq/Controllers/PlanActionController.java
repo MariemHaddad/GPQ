@@ -97,19 +97,29 @@ public class PlanActionController {
     }
 
     // Mettre à jour une action
-    @PutMapping("/actions/update/{id}")
+    @PutMapping("/actions/update/{idPa}")
     @PreAuthorize("hasRole('RQUALITE')")
-    public ResponseEntity<Action> updateAction(
-            @PathVariable Long id,
-            @RequestBody Action actionDetails) {
-        Action updatedAction = planActionService.updateAction(id, actionDetails);
-        if (updatedAction == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(updatedAction);
-    }
+    public ResponseEntity<Void> updateActions(
+            @PathVariable Long idPa,
+            @RequestBody List<Action> actions) {
 
-    // Supprimer une action par ID
+        // Check if the list of actions is empty or null
+        if (actions == null || actions.isEmpty()) {
+            return ResponseEntity.badRequest().build(); // Return 400 Bad Request if no action is provided
+        }
+
+        // Loop through the actions and update each one
+        for (Action action : actions) {
+            Action updatedAction = planActionService.updateAction(action.getId(), action); // Assuming each action has an ID
+            if (updatedAction == null) {
+                return ResponseEntity.notFound().build(); // Return 404 Not Found if no action was found
+            }
+        }
+
+        // Return 204 No Content if the update is successful
+        return ResponseEntity.noContent().build();
+    }
+    //pprimer une action par ID
     @DeleteMapping("/actions/delete/{id}")
     @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<Void> deleteAction(@PathVariable Long id) {
