@@ -1,3 +1,4 @@
+// AnalyseCausaleController.java
 package com.example.gpq.Controllers;
 
 import com.example.gpq.Entities.*;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/analyseCausale")
@@ -53,6 +56,7 @@ public class AnalyseCausaleController {
 
         return ResponseEntity.ok("Analyse causale et plan d'action ajoutés avec succès.");
     }
+
     @GetMapping("/byChecklist/{checklistId}")
     public ResponseEntity<AnalyseCausale> getAnalyseCausaleByChecklist(@PathVariable Long checklistId) {
         AnalyseCausale analyseCausale = analyseCausaleService.getAnalyseCausaleByChecklist(checklistId);
@@ -62,6 +66,7 @@ public class AnalyseCausaleController {
         }
         return ResponseEntity.ok(analyseCausale);
     }
+
     @PostMapping("/{id}/addPourquoi")
     @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<String> ajouterPourquoi(@PathVariable Long id, @RequestBody Pourquoi pourquoi) {
@@ -85,9 +90,12 @@ public class AnalyseCausaleController {
         // Récupérez l'analyse causale par ID
         AnalyseCausale analyseCausale = analyseCausaleService.getAnalyseCausaleById(id);
 
-        // Vérifiez que l'analyse causale utilise la méthode Ishikawa
         if (analyseCausale == null || analyseCausale.getMethodeAnalyse() != MethodeAnalyse.ISHIKAWA) {
             return ResponseEntity.badRequest().body("L'analyse causale doit utiliser la méthode Ishikawa pour ajouter des causes.");
+        }
+
+        if (analyseCausale.getCausesIshikawa() == null) {
+            analyseCausale.setCausesIshikawa(new ArrayList<>());
         }
 
         cause.setAnalyseCausale(analyseCausale);

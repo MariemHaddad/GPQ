@@ -165,7 +165,7 @@ public class PhaseController {
         phase.setObjectifs(phaseDetails.getObjectifs());
         phase.setPlannedStartDate(phaseDetails.getPlannedStartDate());
         phase.setPlannedEndDate(phaseDetails.getPlannedEndDate());
-
+        phase.setEtat(phaseDetails.getEtat());
         // Vérifie et met à jour les efforts
         if (phaseDetails.getEffortActuel() != null) {
             phase.setEffortActuel(phaseDetails.getEffortActuel());

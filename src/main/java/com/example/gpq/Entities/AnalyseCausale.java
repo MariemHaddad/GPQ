@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 @Entity
 @Getter
@@ -36,11 +37,11 @@ public class AnalyseCausale {
 
     @OneToMany(mappedBy = "analyseCausale", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("analyse-cinqPourquoi")
-    private List<Pourquoi> cinqPourquoi;
+    private List<Pourquoi> cinqPourquoi = new ArrayList<>();
 
     @OneToMany(mappedBy = "analyseCausale", cascade = CascadeType.ALL)
     @JsonManagedReference("analyse-causesIshikawa")
-    private List<CauseIshikawa> causesIshikawa;
+    private List<CauseIshikawa> causesIshikawa = new ArrayList<>();
     @OneToOne(mappedBy = "analyseCausale", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("analyse-planActions")
     private PlanAction planAction;

@@ -27,37 +27,35 @@ public class AnalyseCausaleServiceImpl implements IAnalyseCausaleService {
     private CauseIshikawaRepository causeIshikawaRepository;
     @Autowired
     private PlanActionRepository planActionRepository;
-
+    @Override
     public void saveAnalyseCausale(AnalyseCausale analyseCausale) {
-        // Sauvegarder l'analyse causale
-        AnalyseCausale savedAnalyseCausale = analyseCausaleRepository.save(analyseCausale);
-
-        // Créer un PlanAction associé
+        // Créer le plan d'action
         PlanAction planAction = new PlanAction();
-        planAction.setAnalyseCausale(savedAnalyseCausale);
+        planAction.setAnalyseCausale(analyseCausale);
+        analyseCausale.setPlanAction(planAction);
 
-        // Ajouter les actions au plan d'action
-        List<Action> actions = analyseCausale.getCausesIshikawa().stream()
-                .map(cause -> {
-                    Action action = new Action();
-                    action.setDescription(cause.getAction()); // Description de l'action est le champ "action" dans la cause
-                    action.setType(null); // Utilisation de l'énumération CategorieIshikawa
-                    // Laisser les autres champs pour mise à jour ultérieure
-                    action.setResponsable(null);
-                    action.setDatePlanification(null);
-                    action.setDateRealisation(null);
-                    action.setCritereEfficacite(null);
-                    action.setEfficace(null);
-                    action.setCommentaire(null);
-                    action.setPlanAction(planAction); // Associe l'action au plan d'action
-                    return action;
-                })
-                .collect(Collectors.toList());
+        // Ajouter les actions à partir des 5 Pourquoi
+        if (analyseCausale.getMethodeAnalyse() == MethodeAnalyse.FIVE_WHYS) {
+            List<Action> actions = analyseCausale.getCinqPourquoi().stream()
+                    .map(pourquoi -> {
+                        Action action = new Action();
+                        action.setDescription(pourquoi.getAction()); // Action associée à chaque8/// ourquoi
+                        action.setType(null); // Ajoutez votre logique pour définir le type, si nécessaire
+                        // Initialiser les autres champs pour mise à jour ultérieure
+                        action.setResponsable(null);
+                        action.setDatePlanification(null);
+                        action.setDateRealisation(null);
+                        action.setCritereEfficacite(null);
+                        action.setEfficace(null);
+                        action.setCommentaire(null);
+                        action.setPlanAction(planAction); // Associe l'action au plan d'action
+                        return action;
+                    })
+                    .collect(Collectors.toList());
+            planAction.setActions(actions);
+        }
 
-        planAction.setActions(actions);
-
-        // Sauvegarder le plan d'action avec les actions associées
-        planActionRepository.save(planAction);
+        analyseCausaleRepository.save(analyseCausale);
     }
 
     @Override
