@@ -1,9 +1,6 @@
 package com.example.gpq.Controllers;
 
-import com.example.gpq.Entities.Checklist;
-import com.example.gpq.Entities.EtatPhase;
-import com.example.gpq.Entities.Phase;
-import com.example.gpq.Entities.Projet;
+import com.example.gpq.Entities.*;
 import com.example.gpq.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -166,6 +163,8 @@ public class PhaseController {
         phase.setPlannedStartDate(phaseDetails.getPlannedStartDate());
         phase.setPlannedEndDate(phaseDetails.getPlannedEndDate());
         phase.setEtat(phaseDetails.getEtat());
+        phase.setStatusLivraisonExterne(phaseDetails.getStatusLivraisonExterne());
+        phase.setStatusLivraisonInterne(phaseDetails.getStatusLivraisonInterne());
         // Vérifie et met à jour les efforts
         if (phaseDetails.getEffortActuel() != null) {
             phase.setEffortActuel(phaseDetails.getEffortActuel());
@@ -223,5 +222,72 @@ public class PhaseController {
         double scheduleVariance = phaseService.calculerScheduleVariance(phaseId);  // Appel de la méthode via l'interface
         return ResponseEntity.ok(scheduleVariance);
     }
+    @PutMapping("/{id}/updateLivraisonStatus")
+    @PreAuthorize("hasRole('CHEFDEPROJET')")
+    public ResponseEntity<String> updateLivraisonStatus(
+            @PathVariable Long id,
+            @RequestParam EtatLivraison statusInterne,
+            @RequestParam EtatLivraison statusExterne) {
+
+        Optional<Phase> phaseOpt = phaseService.findById(id);
+        if (phaseOpt.isEmpty()) {
+            logger.error("Phase not found with ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Phase non trouvée.");
+        }
+
+        Phase phase = phaseOpt.get();
+        phase.setStatusLivraisonInterne(statusInterne);
+        phase.setStatusLivraisonExterne(statusExterne);
+        phaseService.save(phase);
+
+        logger.info("Livraison statuses updated for phase ID: " + id);
+        return ResponseEntity.ok("Statuts de livraison mis à jour avec succès.");
+    }
+
+    // Endpoint pour calculer le taux de non-conformité externe
+    @GetMapping("/projet/{projetId}/tauxNCExterne")
+    public ResponseEntity<Double> getTauxNCExterne(@PathVariable Long projetId) {
+        Optional<Projet> projetOpt = projetService.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            logger.error("Projet not found with ID: " + projetId);
+            return ResponseEntity.notFound().build();
+        }
+
+        Projet projet = projetOpt.get();
+        List<Phase> phases = applicationService.getPhasesByProjet(projet);
+
+        long totalStatuts = phases.size();
+        long nombreNCExterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonExterne() == EtatLivraison.NC)
+                .count();
+
+        double tauxNCExterne = (totalStatuts > 0) ? ((double) nombreNCExterne / totalStatuts) * 100 : 0.0;
+
+        return ResponseEntity.ok(tauxNCExterne);
+    }
+
+    // Endpoint pour calculer le taux de non-conformité interne
+    @GetMapping("/projet/{projetId}/tauxNCInterne")
+    public ResponseEntity<Double> getTauxNCInterne(@PathVariable Long projetId) {
+        Optional<Projet> projetOpt = projetService.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            logger.error("Projet not found with ID: " + projetId);
+            return ResponseEntity.notFound().build();
+        }
+
+        Projet projet = projetOpt.get();
+        List<Phase> phases = applicationService.getPhasesByProjet(projet);
+
+        long totalStatuts = phases.size();
+        long nombreNCInterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonInterne() == EtatLivraison.NC)
+                .count();
+
+        double tauxNCInterne = (totalStatuts > 0) ? ((double) nombreNCInterne / totalStatuts) * 100 : 0.0;
+
+        return ResponseEntity.ok(tauxNCInterne);
+    }
 
 }
+
+

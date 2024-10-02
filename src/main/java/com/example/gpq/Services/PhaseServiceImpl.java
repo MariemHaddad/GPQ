@@ -4,6 +4,7 @@ import com.example.gpq.Entities.Checklist;
 import com.example.gpq.Entities.EtatPhase;
 import com.example.gpq.Entities.Phase;
 import com.example.gpq.Entities.Projet;
+import com.example.gpq.Entities.*;
 import com.example.gpq.Repositories.PhaseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +122,33 @@ public class PhaseServiceImpl implements IPhaseService {
             }
         }
         return 0; // Gérer les cas où les dates sont nulles ou la phase introuvable
+    }
+    @Override
+    public double calculerTauxNCInterne(Projet projet) {
+        List<Phase> phases = phaseRepository.findByProjet(projet);
+        if (phases.isEmpty()) {
+            return 0;
+        }
+
+        long nombreNCInterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonInterne() == EtatLivraison.NC)
+                .count();
+
+        return (double) nombreNCInterne / phases.size();
+    }
+
+    @Override
+    public double calculerTauxNCExterne(Projet projet) {
+        List<Phase> phases = phaseRepository.findByProjet(projet);
+        if (phases.isEmpty()) {
+            return 0;
+        }
+
+        long nombreNCExterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonExterne() == EtatLivraison.NC)
+                .count();
+
+        return (double) nombreNCExterne / phases.size();
     }
 
 }

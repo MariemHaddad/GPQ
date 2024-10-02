@@ -1,5 +1,6 @@
 package com.example.gpq.Configuration;
 
+import com.example.gpq.Entities.EtatLivraison;
 import com.example.gpq.Entities.EtatPhase;
 import com.example.gpq.Entities.Phase;
 import com.fasterxml.jackson.core.JsonParser;
@@ -78,6 +79,26 @@ public class PhaseDeserializer extends JsonDeserializer<Phase> {
             phase.setEtat(EtatPhase.EN_ATTENTE); // Valeur par défaut si aucune n'est fournie
         }
 
+        JsonNode statusLivraisonInterneNode = node.get("statusLivraisonInterne");
+        if (statusLivraisonInterneNode != null && !statusLivraisonInterneNode.isNull()) {
+            String statusInterneValue = statusLivraisonInterneNode.asText().toUpperCase();
+            try {
+                phase.setStatusLivraisonInterne(EtatLivraison.valueOf(statusInterneValue));
+            } catch (IllegalArgumentException e) {
+                throw new IOException("Valeur invalide pour statusLivraisonInterne : " + statusInterneValue, e);
+            }
+        }
+
+        // Deserialize statusLivraisonExterne
+        JsonNode statusLivraisonExterneNode = node.get("statusLivraisonExterne");
+        if (statusLivraisonExterneNode != null && !statusLivraisonExterneNode.isNull()) {
+            String statusExterneValue = statusLivraisonExterneNode.asText().toUpperCase();
+            try {
+                phase.setStatusLivraisonExterne(EtatLivraison.valueOf(statusExterneValue));
+            } catch (IllegalArgumentException e) {
+                throw new IOException("Valeur invalide pour statusLivraisonExterne : " + statusExterneValue, e);
+            }
+        }
 
         return phase;
     }

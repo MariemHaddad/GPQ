@@ -20,4 +20,7 @@ public interface IPhaseService {
     double calculerEffortVariance(Long phaseId);
     double calculerScheduleVariance(Long phaseId);
     void deletePhase(Long id);
+    double calculerTauxNCInterne(Projet projet);
+    double calculerTauxNCExterne(Projet projet);
+
 }

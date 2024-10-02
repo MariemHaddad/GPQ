@@ -13,4 +13,5 @@ public interface IProjetService {
 
     List<Projet> findByActivite(Activite activite);
 
+
     Optional<Projet> findById(Long id);}

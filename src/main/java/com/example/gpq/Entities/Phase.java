@@ -33,7 +33,11 @@ public class Phase {
     private Double effortPlanifie;
     @Enumerated(EnumType.STRING)
     private EtatPhase etat = EtatPhase.EN_ATTENTE;
+    @Enumerated(EnumType.STRING)
+    private EtatLivraison statusLivraisonInterne; // Ajout du statut de livraison interne
 
+    @Enumerated(EnumType.STRING)
+    private EtatLivraison statusLivraisonExterne;
     @ManyToOne
     @JoinColumn(name = "projet_id")
     @JsonBackReference

@@ -1,11 +1,11 @@
 package com.example.gpq.Controllers;
 
+import com.example.gpq.DTO.TauxNCResponse;
 import com.example.gpq.Entities.*;
-import com.example.gpq.Services.IActiviteService;
-import com.example.gpq.Services.IClientService;
-import com.example.gpq.Services.IProjetService;
-import com.example.gpq.Services.IUserService;
+import com.example.gpq.Services.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +14,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projet")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProjetController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PhaseController.class); // Updated to PhaseController
+    private final ApplicationService applicationService;
+    @Autowired
+    public ProjetController(ApplicationService applicationService, IProjetService projetService,
+                           IChecklistService checklistService, IPhaseService phaseService) {
+        this.applicationService = applicationService;}
     @Autowired
     private IProjetService projetService;
 
@@ -107,5 +115,66 @@ public class ProjetController {
         }
         List<Projet> projets = projetService.findByActivite(activite);
         return ResponseEntity.ok(projets);
+    }
+
+    @GetMapping("/activite/{activiteId}/tauxNC")
+    public ResponseEntity<List<TauxNCResponse>> getTauxNCTousProjets(@PathVariable Long activiteId) {
+        Activite activite = activiteService.findById(activiteId);
+        if (activite == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        List<Projet> projets = projetService.findByActivite(activite);
+        List<TauxNCResponse> tauxNCList = new ArrayList<>();
+
+        for (Projet projet : projets) {
+            double tauxNCInterne = getTauxNCInterne(projet.getIdP()).getBody(); // Update if getId() is renamed
+            double tauxNCExterne = getTauxNCExterne(projet.getIdP()).getBody(); // Update if getId() is renamed
+
+            tauxNCList.add(new TauxNCResponse(projet.getIdP(), projet.getNomP(), tauxNCInterne, tauxNCExterne));
+        }
+
+        return ResponseEntity.ok(tauxNCList);
+    }  @GetMapping("/projet/{projetId}/tauxNCExterne")
+    public ResponseEntity<Double> getTauxNCExterne(@PathVariable Long projetId) {
+        Optional<Projet> projetOpt = projetService.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            logger.error("Projet not found with ID: " + projetId);
+            return ResponseEntity.notFound().build();
+        }
+
+        Projet projet = projetOpt.get();
+        List<Phase> phases = applicationService.getPhasesByProjet(projet);
+
+        long totalStatuts = phases.size();
+        long nombreNCExterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonExterne() == EtatLivraison.NC)
+                .count();
+
+        double tauxNCExterne = (totalStatuts > 0) ? ((double) nombreNCExterne / totalStatuts) * 100 : 0.0;
+
+        return ResponseEntity.ok(tauxNCExterne);
+    }
+
+    // Endpoint pour calculer le taux de non-conformité interne
+    @GetMapping("/projet/{projetId}/tauxNCInterne")
+    public ResponseEntity<Double> getTauxNCInterne(@PathVariable Long projetId) {
+        Optional<Projet> projetOpt = projetService.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            logger.error("Projet not found with ID: " + projetId);
+            return ResponseEntity.notFound().build();
+        }
+
+        Projet projet = projetOpt.get();
+        List<Phase> phases = applicationService.getPhasesByProjet(projet);
+
+        long totalStatuts = phases.size();
+        long nombreNCInterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonInterne() == EtatLivraison.NC)
+                .count();
+
+        double tauxNCInterne = (totalStatuts > 0) ? ((double) nombreNCInterne / totalStatuts) * 100 : 0.0;
+
+        return ResponseEntity.ok(tauxNCInterne);
     }
 }
