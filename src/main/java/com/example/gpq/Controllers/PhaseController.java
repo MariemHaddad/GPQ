@@ -162,6 +162,8 @@ public class PhaseController {
         phase.setObjectifs(phaseDetails.getObjectifs());
         phase.setPlannedStartDate(phaseDetails.getPlannedStartDate());
         phase.setPlannedEndDate(phaseDetails.getPlannedEndDate());
+        phase.setEffectiveStartDate(phaseDetails.getEffectiveStartDate());
+        phase.setEffectiveEndDate(phaseDetails.getEffectiveEndDate());
         phase.setEtat(phaseDetails.getEtat());
         phase.setStatusLivraisonExterne(phaseDetails.getStatusLivraisonExterne());
         phase.setStatusLivraisonInterne(phaseDetails.getStatusLivraisonInterne());

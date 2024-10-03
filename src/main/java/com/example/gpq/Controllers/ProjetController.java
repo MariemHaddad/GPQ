@@ -1,6 +1,8 @@
 package com.example.gpq.Controllers;
 
+import com.example.gpq.DTO.TauxNCAggregator;
 import com.example.gpq.DTO.TauxNCResponse;
+import com.example.gpq.DTO.TauxNCSemestrielResponse;
 import com.example.gpq.Entities.*;
 import com.example.gpq.Services.*;
 
@@ -14,9 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/projet")
@@ -108,6 +108,7 @@ public class ProjetController {
     }
 
     @GetMapping("/activites/{activiteId}/projets")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     public ResponseEntity<List<Projet>> getProjetsByActivite(@PathVariable Long activiteId) {
         Activite activite = activiteService.findById(activiteId);
         if (activite == null) {
@@ -118,6 +119,7 @@ public class ProjetController {
     }
 
     @GetMapping("/activite/{activiteId}/tauxNC")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     public ResponseEntity<List<TauxNCResponse>> getTauxNCTousProjets(@PathVariable Long activiteId) {
         Activite activite = activiteService.findById(activiteId);
         if (activite == null) {
@@ -136,6 +138,7 @@ public class ProjetController {
 
         return ResponseEntity.ok(tauxNCList);
     }  @GetMapping("/projet/{projetId}/tauxNCExterne")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     public ResponseEntity<Double> getTauxNCExterne(@PathVariable Long projetId) {
         Optional<Projet> projetOpt = projetService.findById(projetId);
         if (projetOpt.isEmpty()) {
@@ -158,6 +161,7 @@ public class ProjetController {
 
     // Endpoint pour calculer le taux de non-conformité interne
     @GetMapping("/projet/{projetId}/tauxNCInterne")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     public ResponseEntity<Double> getTauxNCInterne(@PathVariable Long projetId) {
         Optional<Projet> projetOpt = projetService.findById(projetId);
         if (projetOpt.isEmpty()) {
@@ -176,5 +180,59 @@ public class ProjetController {
         double tauxNCInterne = (totalStatuts > 0) ? ((double) nombreNCInterne / totalStatuts) * 100 : 0.0;
 
         return ResponseEntity.ok(tauxNCInterne);
+    }
+    @GetMapping("/activite/{activiteId}/tauxNCSemestriels")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
+    public ResponseEntity<List<TauxNCSemestrielResponse>> getTauxNCSemestriels(@PathVariable Long activiteId) {
+        Activite activite = activiteService.findById(activiteId);
+        if (activite == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        List<Projet> projets = projetService.findByActivite(activite);
+        Map<String, TauxNCAggregator> tauxMap = new HashMap<>();
+
+        for (Projet projet : projets) {
+            List<Phase> phases = applicationService.getPhasesByProjet(projet);
+            for (Phase phase : phases) {
+                String semestreKey = getSemestreKey(phase.getPlannedStartDate());
+
+                TauxNCAggregator tauxAggregator = tauxMap.getOrDefault(semestreKey, new TauxNCAggregator());
+                tauxAggregator.setTotalStatuts(tauxAggregator.getTotalStatuts() + 1);
+
+                if (phase.getStatusLivraisonInterne() == EtatLivraison.NC) {
+                    tauxAggregator.setNombreNCInterne(tauxAggregator.getNombreNCInterne() + 1);
+                }
+                if (phase.getStatusLivraisonExterne() == EtatLivraison.NC) {
+                    tauxAggregator.setNombreNCExterne(tauxAggregator.getNombreNCExterne() + 1);
+                }
+
+                tauxMap.put(semestreKey, tauxAggregator);
+            }
+        }
+
+        List<TauxNCSemestrielResponse> responseList = new ArrayList<>();
+        for (Map.Entry<String, TauxNCAggregator> entry : tauxMap.entrySet()) {
+            String semestre = entry.getKey();
+            TauxNCAggregator aggregator = entry.getValue();
+
+            double tauxNCInterne = (aggregator.getTotalStatuts() > 0) ? ((double) aggregator.getNombreNCInterne() / aggregator.getTotalStatuts()) * 100 : 0.0;
+            double tauxNCExterne = (aggregator.getTotalStatuts() > 0) ? ((double) aggregator.getNombreNCExterne() / aggregator.getTotalStatuts()) * 100 : 0.0;
+            responseList.add(new TauxNCSemestrielResponse(semestre, tauxNCInterne, tauxNCExterne));
+        }
+
+        return ResponseEntity.ok(responseList);
+    }
+
+    private String getSemestreKey(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+
+        // Determine which semester the month belongs to
+        String semestre = (month < 6) ? "S1" : "S2";
+
+        return year + "-" + semestre;
     }
 }

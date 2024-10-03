@@ -14,8 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @ToString(exclude = {"phases", "activite", "client", "users"})
 @Builder
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idP")
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property ="idP")
 public class Projet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,8 +52,7 @@ public class Projet {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Client client;
 
-    @OneToMany(mappedBy = "projet")
-    @JsonManagedReference
+    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Phase> phases;
 
     // Custom setters for names

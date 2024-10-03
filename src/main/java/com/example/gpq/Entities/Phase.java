@@ -40,7 +40,6 @@ public class Phase {
     private EtatLivraison statusLivraisonExterne;
     @ManyToOne
     @JoinColumn(name = "projet_id")
-    @JsonBackReference
     private Projet projet;
 
     @OneToOne(mappedBy = "phase", fetch = FetchType.LAZY)

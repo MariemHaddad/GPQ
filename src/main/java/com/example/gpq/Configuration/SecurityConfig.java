@@ -23,9 +23,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/api/authentication/register", "/api/authentication/authenticate","/activites/getActivities","/api/analyseCausale/byChecklist/{checklistId}","/api/planAction/analyseCausale/{idAN}/planAction").permitAll()
                 .requestMatchers("/api/authentication/change-account-status","/api/authentication/pending-users","/activites/modifier/{id}","/activites/supprimer/{id}","/activites/ajouter").hasRole("ADMIN")
-                .requestMatchers("/api/projet/**").hasAnyRole("CHEFDEPROJET", "DIRECTEUR")
+                .requestMatchers("/api/projet/**").hasAnyRole("CHEFDEPROJET", "DIRECTEUR","RQUALITE")
                 .requestMatchers("/api/phases/ajouterPhases","/api/phases/updatePhase/{id}","/projet/{projetId}/tauxNCInterne").hasAnyRole("CHEFDEPROJET")
-                .requestMatchers("/api/checklists/initialize","/api/phases/projet/{projetId}","/api/checklists/byPhase/{phaseId}").hasAnyRole("CHEFDEPROJET","RQUALITE")
+                .requestMatchers("/api/checklists/initialize","/api/phases/projet/{projetId}","/api/checklists/byPhase/{phaseId}","/api/projet/**").hasAnyRole("CHEFDEPROJET","RQUALITE")
                 .requestMatchers("/api/checklists/**","/api/analyseCausale/add","/api/analyseCausale/{id}/addPourquoi", "/api/analyseCausale/{id}/addCauseIshikawa","/api/planAction/**").hasRole("RQUALITE")
 
                 .anyRequest().authenticated()
