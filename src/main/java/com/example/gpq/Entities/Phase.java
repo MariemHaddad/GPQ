@@ -42,7 +42,7 @@ public class Phase {
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
-    @OneToOne(mappedBy = "phase", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "phase",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private Checklist checklist;
 

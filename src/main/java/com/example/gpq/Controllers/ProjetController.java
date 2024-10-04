@@ -1,5 +1,6 @@
 package com.example.gpq.Controllers;
 
+import com.example.gpq.DTO.SatisfactionDataDTO;
 import com.example.gpq.DTO.TauxNCAggregator;
 import com.example.gpq.DTO.TauxNCResponse;
 import com.example.gpq.DTO.TauxNCSemestrielResponse;
@@ -50,6 +51,12 @@ public class ProjetController {
     public ResponseEntity<List<User>> getResponsablesQualite() {
         List<User> responsablesQualite = userService.findByRole(Role.RQUALITE);
         return ResponseEntity.ok(responsablesQualite);
+    }
+    @GetMapping("/satisfaction/{activityId}")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
+    public ResponseEntity<List<SatisfactionDataDTO>> getSatisfactionData(@PathVariable Long activityId) {
+        List<SatisfactionDataDTO> satisfactionData = projetService.getSatisfactionDataForActivity(activityId);
+        return new ResponseEntity<>(satisfactionData, HttpStatus.OK);
     }
 
     @PostMapping("/ajouter")
@@ -234,5 +241,42 @@ public class ProjetController {
         String semestre = (month < 6) ? "S1" : "S2";
 
         return year + "-" + semestre;
+    }
+    @PutMapping("/modifier/{projetId}")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('DIRECTEUR')")
+    public ResponseEntity<String> modifierProjet(@PathVariable Long projetId, @RequestBody Projet projetDetails) {
+        Optional<Projet> projetOpt = projetService.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Projet non trouvé.");
+        }
+        Projet projet = projetOpt.get();
+
+        // Mettre à jour les détails du projet
+        projet.setNomP(projetDetails.getNomP());
+        projet.setDescriptionP(projetDetails.getDescriptionP());
+        projet.setDatedebutP(projetDetails.getDatedebutP());
+        projet.setDatefinP(projetDetails.getDatefinP());
+        projet.setMethodologie(projetDetails.getMethodologie());
+        projet.setObjectifs(projetDetails.getObjectifs());
+        projet.setSatisfactionClient(projetDetails.getSatisfactionClient());
+        projet.setValeurSatisfaction(projetDetails.getValeurSatisfaction());
+        projet.setTypeprojet(projetDetails.getTypeprojet());
+
+        projetService.save(projet); // Sauvegarder les modifications
+        return ResponseEntity.ok("Projet modifié avec succès.");
+    }
+    @DeleteMapping("/supprimer/{projetId}")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('DIRECTEUR')") // Assurez-vous que seuls certains rôles peuvent supprimer
+    public ResponseEntity<String> supprimerProjet(@PathVariable Long projetId) {
+        Optional<Projet> projetOpt = projetService.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Projet non trouvé.");
+        }
+
+        Projet projet = projetOpt.get();
+
+        // Suppression automatique des entités associées grâce à la cascade définie dans la classe Projet
+        projetService.delete(projet); // Utilisez une méthode dans le service pour gérer la suppression
+        return ResponseEntity.ok("Projet et toutes ses entités associées supprimés avec succès.");
     }
 }

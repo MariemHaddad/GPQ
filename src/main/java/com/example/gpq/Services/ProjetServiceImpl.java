@@ -1,17 +1,14 @@
 package com.example.gpq.Services;
 
-import com.example.gpq.Entities.Activite;
-import com.example.gpq.Entities.Projet;
-import com.example.gpq.Entities.Role;
-import com.example.gpq.Entities.User;
+import com.example.gpq.DTO.SatisfactionDataDTO;
+import com.example.gpq.Entities.*;
 import com.example.gpq.Repositories.ProjetRepository;
 import com.example.gpq.Repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -55,7 +52,18 @@ public class ProjetServiceImpl implements IProjetService {
             throw new IllegalArgumentException("L'utilisateur n'a pas le rôle approprié pour ajouter un projet");
         }
     }
-
+    @Override
+    public void save(Projet projet) {
+        projetRepository.save(projet); // Save the project using the repository
+    }
+    @Override
+    public void delete(Projet projet) {
+        if (projet != null && projet.getIdP() != null) {
+            projetRepository.deleteById(projet.getIdP()); // Delete by project ID
+        } else {
+            throw new IllegalArgumentException("Cannot delete a project with a null ID.");
+        }
+    }
     private void attribuerUtilisateursAuProjet(Projet projet, User chefDeProjet, User responsableQualite) {
         // Assurez-vous que les utilisateurs sélectionnés ne sont pas null avant de les attribuer au projet
         if (chefDeProjet != null && responsableQualite != null) {
@@ -83,5 +91,37 @@ public class ProjetServiceImpl implements IProjetService {
     @Override
     public Optional<Projet> findById(Long id) {
         return projetRepository.findById(id);
+    }
+    @Override
+    public List<SatisfactionDataDTO> getSatisfactionDataForActivity(Long activiteId) {
+        List<Projet> projects = projetRepository.findByActiviteIdA(activiteId);
+
+        Map<String, SatisfactionDataDTO> satisfactionDataMap = new TreeMap<>(); // Utiliser une TreeMap pour trier par semestre
+
+        for (Projet project : projects) {
+            String semester = project.getSemester(); // Calcul du semestre
+            SatisfactionDataDTO data = satisfactionDataMap.getOrDefault(semester, new SatisfactionDataDTO(semester, 0.0, 0.0));
+
+            // Vérifiez le type de satisfaction et ajoutez la valeur appropriée
+            if (project.getSatisfactionClient() == TypeSatisfaction.SI1) {
+                data.setSi1Value(data.getSi1Value() + project.getValeurSatisfaction());
+            } else if (project.getSatisfactionClient() == TypeSatisfaction.SI2) {
+                data.setSi2Value(data.getSi2Value() + project.getValeurSatisfaction());
+            }
+
+            satisfactionDataMap.put(semester, data);
+        }
+
+        return new ArrayList<>(satisfactionDataMap.values());}
+    public void addSatisfaction(Long projectId, Double satisfactionValue, TypeSatisfaction type) {
+        Projet projet = projetRepository.findById(projectId).orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (type == TypeSatisfaction.SI1) {
+            projet.setValeurSatisfaction(satisfactionValue); // Assurez-vous que cela fonctionne pour SI1
+        } else if (type == TypeSatisfaction.SI2) {
+            projet.setValeurSatisfaction(satisfactionValue); // Vous aurez peut-être besoin d'une variable différente pour SI2
+        }
+
+        projetRepository.save(projet);
     }
 }

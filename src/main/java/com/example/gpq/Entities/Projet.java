@@ -2,6 +2,7 @@ package com.example.gpq.Entities;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.*;
 
 
@@ -28,7 +29,10 @@ public class Projet {
     private Date datefinP;
     private String methodologie;
     private String objectifs;
+    @Enumerated(EnumType.STRING)
+    private TypeSatisfaction satisfactionClient;
 
+    private Double valeurSatisfaction;
     @Enumerated(EnumType.STRING)
     private TypeProjet typeprojet;
 
@@ -69,4 +73,24 @@ public class Projet {
             this.responsableQualiteNom = responsableQualite.getNom();
         }
     }
-}
+    public double getSi1() {
+        if (this.valeurSatisfaction == null) {
+            // Ajouter un log pour comprendre pourquoi valeurSatisfaction est null
+            System.out.println("valeurSatisfaction is null for Projet ID: " + this.idP);
+            return 0.0; // ou une valeur par défaut que vous jugez appropriée
+        }
+        return this.valeurSatisfaction;
+    }
+
+    public double getSi2() {
+        // Ajouter une logique pour SI2 si nécessaire, ou une nouvelle variable pour SI2
+        return 0.0; // À remplacer par l'attribut approprié
+    }
+    public String getSemester() {
+        int year = this.datedebutP.getYear() + 1900; // Conversion de l'année
+        int month = this.datedebutP.getMonth() + 1; // Les mois commencent à 0
+        String semester = (month <= 6) ? "S1-" + year : "S2-" + year;
+        return semester;
+
+
+    }}

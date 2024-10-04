@@ -10,5 +10,8 @@ import java.util.List;
 
 public interface ProjetRepository extends JpaRepository<Projet, Long> {
     List<Projet> findByActivite(Activite activite);
+    List<Projet> findByActiviteIdA(Long activiteId);
+
+
 }
 
