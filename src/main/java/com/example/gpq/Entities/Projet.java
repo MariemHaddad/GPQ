@@ -32,6 +32,17 @@ public class Projet {
     @Enumerated(EnumType.STRING)
     private TypeSatisfaction satisfactionClient;
 
+    private Long nombreRuns;
+    private Long defautInternes; // DI
+    private Long defautTotaux; // DT
+
+    // Méthode pour calculer l'efficacité de détection de défauts (DDE)
+    public double getDDE() {
+        if (defautTotaux == null || defautTotaux == 0) {
+            return 0.0; // Éviter la division par zéro
+        }
+        return (double) defautInternes / defautTotaux * 100; // Retourne le DDE en pourcentage
+    }
     private Double valeurSatisfaction;
     @Enumerated(EnumType.STRING)
     private TypeProjet typeprojet;

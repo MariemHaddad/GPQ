@@ -1,5 +1,7 @@
 package com.example.gpq.Services;
 
+import com.example.gpq.DTO.DDEDataDTO;
+import com.example.gpq.DTO.RunSemestrielDTO;
 import com.example.gpq.DTO.SatisfactionDataDTO;
 import com.example.gpq.Entities.*;
 import com.example.gpq.Repositories.ProjetRepository;
@@ -8,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -55,6 +59,45 @@ public class ProjetServiceImpl implements IProjetService {
     @Override
     public void save(Projet projet) {
         projetRepository.save(projet); // Save the project using the repository
+    }
+    @Override
+    public double calculerDDEPourProjet(Long projetId) {
+        Optional<Projet> projetOpt = projetRepository.findById(projetId);
+        if (projetOpt.isEmpty()) {
+            throw new RuntimeException("Projet introuvable avec ID: " + projetId);
+        }
+
+        Projet projet = projetOpt.get();
+        return projet.getDDE(); // Utilisation de la méthode getDDE de l'entité Projet
+    }
+
+    @Override
+    public List<DDEDataDTO> calculerDDEPourActivite(Long activiteId) {
+        List<Projet> projets = projetRepository.findByActiviteIdA(activiteId);
+        return projets.stream()
+                .map(projet -> new DDEDataDTO(projet.getIdP(), projet.getNomP(), projet.getDDE()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RunSemestrielDTO> getRunsSemestriels(Long activiteId) {
+        List<Projet> projets = projetRepository.findByActiviteIdA(activiteId);
+
+        Map<String, Integer> runMap = new HashMap<>();
+
+        for (Projet projet : projets) {
+            String semestre = projet.getSemester();
+            int currentRuns = runMap.getOrDefault(semestre, 0);
+
+            // Conversion explicite de Long en int
+            int nombreRuns = projet.getNombreRuns() != null ? projet.getNombreRuns().intValue() : 0;
+
+            runMap.put(semestre, currentRuns + nombreRuns);
+        }
+
+        return runMap.entrySet().stream()
+                .map(entry -> new RunSemestrielDTO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
     @Override
     public void delete(Projet projet) {

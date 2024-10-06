@@ -1,15 +1,13 @@
 package com.example.gpq.Controllers;
 
-import com.example.gpq.DTO.SatisfactionDataDTO;
-import com.example.gpq.DTO.TauxNCAggregator;
-import com.example.gpq.DTO.TauxNCResponse;
-import com.example.gpq.DTO.TauxNCSemestrielResponse;
+import com.example.gpq.DTO.*;
 import com.example.gpq.Entities.*;
 import com.example.gpq.Services.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -264,6 +263,54 @@ public class ProjetController {
 
         projetService.save(projet); // Sauvegarder les modifications
         return ResponseEntity.ok("Projet modifié avec succès.");
+    }
+    @GetMapping("/{projetId}/dde")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
+    public ResponseEntity<Double> getDDEPourProjet(@PathVariable Long projetId) {
+        double dde = projetService.calculerDDEPourProjet(projetId);
+        return ResponseEntity.ok(dde);
+    }
+
+    // Endpoint pour obtenir le DDE de tous les projets d'une activité
+    @GetMapping("/activite/{activiteId}/dde")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
+    public ResponseEntity<List<DDEDataDTO>> getDDEPourActivite(@PathVariable Long activiteId) {
+        List<DDEDataDTO> ddeData = projetService.calculerDDEPourActivite(activiteId);
+        return ResponseEntity.ok(ddeData);
+    }
+    @GetMapping("/runs-semestriels/{activiteId}")
+    public ResponseEntity<List<RunSemestrielDTO>> getRunsSemestriels(@PathVariable Long activiteId) {
+        List<RunSemestrielDTO> runsSemestriels = projetService.getRunsSemestriels(activiteId);
+        return ResponseEntity.ok(runsSemestriels);
+    }
+
+    @GetMapping("/activite/{activiteId}/ddeSemestriels")
+    @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
+    public ResponseEntity<Map<String, Double>> getDDESemestriels(@PathVariable Long activiteId) {
+        Activite activite = activiteService.findById(activiteId);
+        if (activite == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        List<Projet> projets = projetService.findByActivite(activite);
+        Map<String, List<Double>> ddeBySemester = new HashMap<>();
+
+        // Grouper les projets par semestre et calculer la moyenne DDE
+        for (Projet projet : projets) {
+            String semester = projet.getSemester();
+            double dde = projet.getDDE();
+
+            ddeBySemester.computeIfAbsent(semester, k -> new ArrayList<>()).add(dde);
+        }
+
+        Map<String, Double> ddeAverageBySemester = new HashMap<>();
+        for (Map.Entry<String, List<Double>> entry : ddeBySemester.entrySet()) {
+            List<Double> ddeList = entry.getValue();
+            double averageDDE = ddeList.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+            ddeAverageBySemester.put(entry.getKey(), averageDDE);
+        }
+
+        return ResponseEntity.ok(ddeAverageBySemester);
     }
     @DeleteMapping("/supprimer/{projetId}")
     @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('DIRECTEUR')") // Assurez-vous que seuls certains rôles peuvent supprimer
