@@ -6,6 +6,7 @@ import com.example.gpq.DTO.SatisfactionDataDTO;
 import com.example.gpq.Entities.*;
 import com.example.gpq.Repositories.ProjetRepository;
 import com.example.gpq.Repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,49 @@ public class ProjetServiceImpl implements IProjetService {
                 .map(entry -> new RunSemestrielDTO(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
+    @Override
+    public double getTauxCByProjet(Long idProjet) {
+        Projet projet = projetRepository.findById(idProjet).orElse(null);
+        return projet != null ? projet.getTauxC() : 0.0;
+    }
+
+    @Override
+    public Map<String, List<Double>> getTauxCBySemestre(Long activiteId) {
+        // Récupérer tous les projets de l'activité
+        List<Projet> projets = projetRepository.findByActiviteIdA(activiteId);
+        Map<String, List<Double>> tauxSemestriels = new HashMap<>();
+
+        for (Projet projet : projets) {
+            String semestre = projet.getSemester();
+            double tauxC = projet.getTauxC();
+
+            tauxSemestriels.putIfAbsent(semestre, new ArrayList<>());
+            tauxSemestriels.get(semestre).add(tauxC);
+        }
+
+        return tauxSemestriels;
+    }
+    @Override
+    public Map<String, List<Double>> getTauxRealisation8DParSemestre(Long activiteId) {
+        // Récupération de tous les projets liés à l'activité
+        List<Projet> projets = projetRepository.findByActiviteIdA(activiteId);
+
+        if (projets.isEmpty()) {
+            throw new EntityNotFoundException("Aucun projet trouvé pour cette activité.");
+        }
+
+        Map<String, List<Double>> tauxParSemestre = new HashMap<>();
+
+        // Itérer à travers chaque projet pour regrouper par semestre et ajouter le taux de réalisation
+        for (Projet projet : projets) {
+            String semester = projet.getSemester();
+            tauxParSemestre.putIfAbsent(semester, new ArrayList<>());
+            tauxParSemestre.get(semester).add(projet.getTauxRealisation8D());
+        }
+
+        return tauxParSemestre;
+    }
+
     @Override
     public void delete(Projet projet) {
         if (projet != null && projet.getIdP() != null) {

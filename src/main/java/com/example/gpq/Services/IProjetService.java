@@ -9,11 +9,15 @@ import com.example.gpq.Entities.User;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface IProjetService {
     double calculerDDEPourProjet(Long projetId);
     List<RunSemestrielDTO> getRunsSemestriels(Long activiteId);
+    double getTauxCByProjet(Long idProjet);
+    Map<String, List<Double>> getTauxCBySemestre(Long activiteId);
+    Map<String, List<Double>> getTauxRealisation8DParSemestre(Long activiteId);
     List<DDEDataDTO> calculerDDEPourActivite(Long activiteId);
     void ajouterProjetAvecAffectation(User utilisateurConnecte, Projet projet,
                                       String chefDeProjetNom, String responsableQualiteNom);

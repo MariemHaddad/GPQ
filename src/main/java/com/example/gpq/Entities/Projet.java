@@ -44,6 +44,16 @@ public class Projet {
         return (double) defautInternes / defautTotaux * 100; // Retourne le DDE en pourcentage
     }
     private Double valeurSatisfaction;
+    private Long nbr8DRealises;
+    private Long nbrRetoursCritiques;
+
+    // Méthode pour calculer le taux de réalisation des 8D
+    public double getTauxRealisation8D() {
+        if (nbrRetoursCritiques == null || nbrRetoursCritiques == 0) {
+            return 0.0; // Éviter la division par zéro
+        }
+        return (double) nbr8DRealises / nbrRetoursCritiques * 100; // Retourne le taux en pourcentage
+    }
     @Enumerated(EnumType.STRING)
     private TypeProjet typeprojet;
 
@@ -104,4 +114,13 @@ public class Projet {
         return semester;
 
 
+    }public double getTauxC() {
+        long countC = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonExterne() == EtatLivraison.C)
+                .count();
+        long totalLivraisonExterne = phases.stream()
+                .filter(phase -> phase.getStatusLivraisonExterne() != null)
+                .count();
+
+        return totalLivraisonExterne == 0 ? 0.0 : (double) countC / totalLivraisonExterne * 100; // Taux en pourcentage
     }}
