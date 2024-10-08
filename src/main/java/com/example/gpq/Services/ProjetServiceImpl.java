@@ -123,6 +123,32 @@ public class ProjetServiceImpl implements IProjetService {
         return tauxSemestriels;
     }
     @Override
+    public Map<String, Double> getTauxLiberationSemestriel(Long activiteId) {
+        Map<String, Double> tauxLiberationSemestriel = new HashMap<>();
+
+        // Récupérer tous les projets liés à l'activité
+        List<Projet> projets = projetRepository.findByActiviteIdA(activiteId);
+
+        // Calculer le taux de libération par semestre
+        for (Projet projet : projets) {
+            String semestre = projet.getSemester(); // Assurez-vous que cette méthode existe et retourne le semestre du projet
+            double tauxLiberation = projet.getTauxLiberation();
+
+            tauxLiberationSemestriel.putIfAbsent(semestre, 0.0);
+            tauxLiberationSemestriel.put(semestre, tauxLiberationSemestriel.get(semestre) + tauxLiberation);
+        }
+
+        // Calculer la moyenne par semestre
+        for (String semestre : tauxLiberationSemestriel.keySet()) {
+            int countProjets = (int) projets.stream().filter(projet -> projet.getSemester().equals(semestre)).count();
+            if (countProjets > 0) {
+                tauxLiberationSemestriel.put(semestre, tauxLiberationSemestriel.get(semestre) / countProjets);
+            }
+        }
+
+        return tauxLiberationSemestriel;
+    }
+    @Override
     public Map<String, List<Double>> getTauxRealisation8DParSemestre(Long activiteId) {
         // Récupération de tous les projets liés à l'activité
         List<Projet> projets = projetRepository.findByActiviteIdA(activiteId);

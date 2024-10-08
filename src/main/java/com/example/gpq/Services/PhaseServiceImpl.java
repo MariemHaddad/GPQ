@@ -34,7 +34,8 @@ public class PhaseServiceImpl implements IPhaseService {
             "La vérification",
             "La validation",
             "Code",
-            "Spécification"
+            "Spécification",
+            "Livraison"
             // Add other valid phase names here
     );
 

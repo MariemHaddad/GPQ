@@ -24,6 +24,7 @@ public interface IProjetService {
 
     List<Projet> findByActivite(Activite activite);
     List<SatisfactionDataDTO> getSatisfactionDataForActivity(Long activiteId);
+    Map<String, Double> getTauxLiberationSemestriel(Long activiteId);
     Optional<Projet> findById(Long id);
     void save(Projet projet);
     void delete(Projet projet);

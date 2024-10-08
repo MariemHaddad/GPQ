@@ -283,6 +283,11 @@ public class ProjetController {
         List<RunSemestrielDTO> runsSemestriels = projetService.getRunsSemestriels(activiteId);
         return ResponseEntity.ok(runsSemestriels);
     }
+    @GetMapping("/activites/{activiteId}/taux-liberation-semestriel")
+    public ResponseEntity<Map<String, Double>> getTauxLiberationSemestriel(@PathVariable Long activiteId) {
+        Map<String, Double> tauxLiberationSemestriel = projetService.getTauxLiberationSemestriel(activiteId);
+        return ResponseEntity.ok(tauxLiberationSemestriel);
+    }
     @GetMapping("/tauxRealisation8D/{activiteId}")
     public Map<String, List<Double>> getTauxRealisation8DParSemestre(@PathVariable Long activiteId) {
         return projetService.getTauxRealisation8DParSemestre(activiteId);

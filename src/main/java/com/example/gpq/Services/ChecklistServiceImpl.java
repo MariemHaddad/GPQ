@@ -377,6 +377,26 @@ public class ChecklistServiceImpl implements IChecklistService {
                 "La conception préliminaire précise les composants acquis et réutilisés",
                 "S'il ne s'agit pas de la première revue, les anciennes sections sont revérifiées en s'assurant que la cohérence du document n'est pas affectée par les modifications apportées"
         ));
+        CHECKLIST_ITEMS_MAP.put("Livraison", Arrays.asList(
+                "Conformité du contenu de la livraison avec la demande client (périmètre initial et évolutions)",
+                "Le patch couvre toutes les corrections demandées par le client",
+                "Spécifications à jour et validées par le client",
+                "La revue des works products",
+                "L'identification du matériel",
+                "Les exigences de surveillance et de mesure sont définies et vérifiées.",
+                "Tests fonctionnels réalisés (taux de couverture, taux d'exécution, taux de succès)",
+                "Tests de non régression réalisés (taux de couverture, taux d'exécution, taux de succès)",
+                "Tests en charge/de robustesse réalisés (taux de couverture, taux d'exécution, taux de succès)",
+                "Tests physiques réalisés (taux de couverture, taux d'exécution, taux de succès)",
+                "Justification des tests non passés",
+                "Justification des bugs non corrigés",
+                "Statuts et criticité des bugs résiduels ",
+                "Documentation de la note de livraison",
+                "Enregistrement des livrables dans le système de gestion de configuration",
+                "L'analyse antivirus du package de livraison",
+                "Respect des règles de confidentialité",
+                "Respect des modalités d'envoi"
+        ));
         // Ajoutez ici d'autres phases et leurs items de checklist
     }
 }

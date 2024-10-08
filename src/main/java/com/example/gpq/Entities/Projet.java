@@ -123,4 +123,23 @@ public class Projet {
                 .count();
 
         return totalLivraisonExterne == 0 ? 0.0 : (double) countC / totalLivraisonExterne * 100; // Taux en pourcentage
+    }
+    public double getTauxLiberation() {
+        long totalLivraison = phases.stream()
+                .filter(phase -> "Livraison".equalsIgnoreCase(phase.getDescription()))
+                .count();
+
+        long livraisonAcceptee = phases.stream()
+                .filter(phase -> "Livraison".equalsIgnoreCase(phase.getDescription()) &&
+                        phase.getChecklist() != null &&
+                        phase.getChecklist().getStatus() == StatusChecklist.ACCEPTE)
+                .peek(phase -> {
+                    System.out.println("Phase: " + phase.getDescription() + ", Checklist Status: " + phase.getChecklist().getStatus());
+                })
+                .count();
+
+        System.out.println("Total Livraison: " + totalLivraison);
+        System.out.println("Livraison Acceptée: " + livraisonAcceptee);
+
+        return totalLivraison == 0 ? 0.0 : (double) livraisonAcceptee / totalLivraison *2 * 100; // Retourner le taux en pourcentage
     }}

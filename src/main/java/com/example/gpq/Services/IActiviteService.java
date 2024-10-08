@@ -3,6 +3,7 @@ package com.example.gpq.Services;
 import com.example.gpq.Entities.Activite;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IActiviteService {
     void ajouterActivite(Activite activite);
@@ -11,4 +12,5 @@ public interface IActiviteService {
 
     List<Activite> getAllActivites();
     Activite findById(Long id);
+
 }
