@@ -286,7 +286,13 @@ public class ChecklistServiceImpl implements IChecklistService {
                 "Les exceptions sont gérées pour les arguments non valides",
                 "Les exceptions sont gérées dans toutes les branches du code",
                 "Les exceptions sont gérées dans les retours des fonctions",
-                "La division par zéro est vérifiée"
+                "La division par zéro est vérifiée",
+                "Les contrôles d'accès et la protection des données sont implémentés dans le code conformémént aux politiques de sécurité.",
+                "Les bibliothèques ou/et les frameworks utilisés ne présentent pas de vulnérabilités (veille CVE)",
+                "Les informations sensibles (comme les mots de passe, les tokens, les clés API) sont stockées et transmises de manière sécurisée",
+                "Les mécanismes d'authentification pour s'assurer qu'ils sont robustes et qu'ils limitent correctement l'accès aux ressources",
+                "Les erreurs sont gérées de manière sécurisée, sans divulguer d'informations sensibles dans les messages d'erreur",
+                "Le code respecte les normes de sécurité reconnues, comme celles définies par OWASP, SANS, NIST, MISSRA ou d'autres organismes similaires"
 
         ));
         CHECKLIST_ITEMS_MAP.put("Spécification", Arrays.asList(
