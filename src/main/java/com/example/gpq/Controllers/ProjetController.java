@@ -260,7 +260,11 @@ public class ProjetController {
         projet.setSatisfactionClient(projetDetails.getSatisfactionClient());
         projet.setValeurSatisfaction(projetDetails.getValeurSatisfaction());
         projet.setTypeprojet(projetDetails.getTypeprojet());
-
+        projet.setDefautInternes(projetDetails.getDefautInternes());
+        projet.setDefautTotaux(projetDetails.getDefautTotaux());
+        projet.setNbr8DRealises(projetDetails.getNbr8DRealises());
+        projet.setNbrRetoursCritiques(projetDetails.getNbrRetoursCritiques());
+        projet.setNombreRuns(projetDetails.getNombreRuns());
         projetService.save(projet); // Sauvegarder les modifications
         return ResponseEntity.ok("Projet modifié avec succès.");
     }
