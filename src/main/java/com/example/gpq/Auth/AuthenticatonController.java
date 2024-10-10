@@ -38,7 +38,7 @@ public class AuthenticatonController {
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
         // Définir l'état du compte sur "PENDING"
         request.setAccountStatus(AccountStatus.PENDING);
-        emailService.sendSimpleEmail("haddadmariem32@gmail.com", "Nouveau compte en attente", "Un nouveau compte utilisateur est en attente de validation.");
+        emailService.sendEmail("haddadmariem32@gmail.com", "Nouveau compte en attente", "Un nouveau compte utilisateur est en attente de validation.");
         return ResponseEntity.ok(service.register(request));
     }
 

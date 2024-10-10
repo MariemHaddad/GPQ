@@ -9,6 +9,8 @@ import java.util.Optional;
 
 
 public interface IUserService extends UserDetailsService {
+    void saveResetToken(String token, User user);
+    Optional<User> getUserByResetToken(String token);
     void registerUser(User user);
     Optional<User> getUserByEmail(String email);
   User findByNom(String nom);
@@ -16,6 +18,8 @@ public interface IUserService extends UserDetailsService {
     User getUserById(Long userId);
     User findById(Long id);
     User findByEmail(String email);
-
+    List<User> getAllUsers();
+    void deleteUser(Long id); // Doit correspondre à l'implémentation dans la classe de service
+    User updateUser(Long id, User updatedUser);
     List<User> findByRole(Role chefdeprojet);
 }

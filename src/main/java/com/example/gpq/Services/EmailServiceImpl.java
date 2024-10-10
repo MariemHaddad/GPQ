@@ -11,7 +11,7 @@ import java.util.Properties;
 @Service
 public class EmailServiceImpl {
 
-    public void sendSimpleEmail(String toEmail, String subject, String body) {
+    public void sendEmail(String toEmail, String subject, String body) {
         try {
             // Vérifier si l'adresse e-mail est null ou vide
             if (toEmail == null || toEmail.isEmpty()) {

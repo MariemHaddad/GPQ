@@ -21,7 +21,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/authentication/register", "/api/authentication/authenticate","/activites/getActivities","/api/analyseCausale/byChecklist/{checklistId}","/api/planAction/analyseCausale/{idAN}/planAction").permitAll()
+                .requestMatchers("/api/authentication/register", "/api/user/reset-password","/api/user/all-users","/api/user/update/{id}","/api/authentication/authenticate","/api/user/forgot-password","/activites/getActivities","/api/analyseCausale/byChecklist/{checklistId}","/api/planAction/analyseCausale/{idAN}/planAction").permitAll()
                 .requestMatchers("/api/authentication/change-account-status","/api/authentication/pending-users","/activites/modifier/{id}","/activites/supprimer/{id}","/activites/ajouter").hasRole("ADMIN")
                 .requestMatchers("/api/projet/**").hasAnyRole("CHEFDEPROJET", "DIRECTEUR","RQUALITE")
                 .requestMatchers("/api/phases/ajouterPhases","/api/phases/updatePhase/{id}","/projet/{projetId}/tauxNCInterne").hasAnyRole("CHEFDEPROJET")

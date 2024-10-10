@@ -2,6 +2,7 @@ package com.example.gpq.Controllers;
 
 import com.example.gpq.Entities.Role;
 import com.example.gpq.Entities.User;
+import com.example.gpq.Services.EmailServiceImpl;
 import com.example.gpq.Services.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,9 +31,25 @@ public class UserController {
    IUserService userService;
     @Autowired
     private JavaMailSender javaMailSender;
-  /*  @Autowired
-private IUserService userService;
-*/
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    @GetMapping("/all-users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> allUsers = userService.getAllUsers();
+        return ResponseEntity.ok(allUsers);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        User user = userService.updateUser(id, updatedUser);
+        return ResponseEntity.ok(user);
+    }
 
     @PostMapping("/registeruser")
     public ResponseEntity<String> registerUser(@RequestBody User user, HttpServletRequest request) {
@@ -84,42 +104,7 @@ private IUserService userService;
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
-    } /*@PostMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody User loginUser, HttpServletRequest request, HttpServletResponse response) {
-        // Vérifier l'authentification
-        User existingUser = userService.getUserByEmail(loginUser.getEmail());
-        if (existingUser != null) {
-            // Vérifier si les mots de passe correspondent
-            if (passwordEncoder.matches(loginUser.getMotDePasse(), existingUser.getMotDePasse())) {
-                // Générer le token JWT
-                String token = Jwts.builder()
-                        .setSubject(existingUser.getEmail())
-                        .signWith(SignatureAlgorithm.HS512, "Zumruduanka2022") // Remplacez "votre_clé_secrète" par votre clé secrète réelle
-                        .compact();
-
-                // Créer une session pour l'utilisateur
-                HttpSession session = request.getSession(true);
-                session.setAttribute("user", existingUser); // Stocker l'utilisateur dans la session
-
-                // Construire le nom d'utilisateur à partir du nom et du prénom de l'utilisateur
-                String username = existingUser.getPrenom() + " " + existingUser.getNom();
-
-                // Ajouter le nom de l'utilisateur à la session
-                session.setAttribute("username", username);
-                session.setAttribute("role", existingUser.getRole().toString());
-
-                // Ajouter le token à la réponse
-                response.addHeader("Authorization", "Bearer " + token);
-
-                // Renvoyer le nom d'utilisateur dans la réponse
-                return ResponseEntity.ok(username);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect.");
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect.");
-        }
-    }*/
+    }
 
     @GetMapping("/user-role")
     public ResponseEntity<String> getUserRole(HttpServletRequest request) {
@@ -150,53 +135,58 @@ private IUserService userService;
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Aucune session à déconnecter.");
         }
-    }/*
+    }
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
-
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'e-mail est manquant ou vide.");
+            return ResponseEntity.badRequest().body("L'e-mail est manquant ou vide.");
         }
 
-        Optional<User> user = userService.getUserByEmail(email);
-
-        if (user == null) {
+        Optional<User> userOptional = userService.getUserByEmail(email);
+        if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé.");
         }
 
-        String newPassword = generateRandomPassword();
-        String hashedPassword = hashPassword(newPassword);
-        user.setMotDePasse(hashedPassword);
-        userService.updateUser(user);
+        User user = userOptional.get(); // Get the user from the Optional
+        String token = generateResetToken();
 
-        String message = "Bonjour,\n\n" +
-                "Votre nouveau mot de passe est : " + newPassword + "\n\n" +
-                "Cordialement,\n" +
-                "Votre équipe.";
+        // Now you can pass the User object to saveResetToken
+        userService.saveResetToken(token, user); // Pass the token and User object
 
-        sendEmail(email, "Réinitialisation du mot de passe", message);
+        String resetLink =  "http://localhost:4200/reset-password?token=" + token;
+        String message = "Bonjour,\n\nPour réinitialiser votre mot de passe, cliquez sur le lien suivant : \n" + resetLink + "\n\nCordialement,\nVotre équipe.";
+        emailService.sendEmail(email, "Réinitialisation du mot de passe", message);
 
-        return ResponseEntity.ok("Un nouveau mot de passe a été envoyé à " + email + ".");
-    }*/
-
-    private String generateRandomPassword() {
-        // Générer un mot de passe aléatoire avec 8 caractères
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder newPassword = new StringBuilder();
-        for (int i = 0; i < 8; i++) {
-            int index = (int) (Math.random() * characters.length());
-            newPassword.append(characters.charAt(index));
-        }
-        return newPassword.toString();
+        return ResponseEntity.ok("Un lien de réinitialisation de mot de passe a été envoyé à " + email + ".");
     }
 
-    private void sendEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        javaMailSender.send(message);
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        System.out.println("Received token: " + token);
+        System.out.println("Received new password: " + newPassword);
+
+        if (token == null || token.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token ou mot de passe manquant.");
+        }
+
+        Optional<User> optionalUser = userService.getUserByResetToken(token);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token invalide.");
+        }
+
+        User user = optionalUser.get(); // Get the user from the Optional
+        user.setMotDePasse(hashPassword(newPassword));
+        user.setResetToken(null); // Reset the token after use
+        userService.updateUser(user);
+
+        return ResponseEntity.ok("Votre mot de passe a été réinitialisé avec succès.");
+    }
+    private String generateResetToken() {
+        return UUID.randomUUID().toString();
     }
     @GetMapping("/chefsdeprojet")
     public ResponseEntity<List<User>> getChefsDeProjet() {

@@ -26,11 +26,17 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    public Claims extractAllClaims(String token) {
+        if (token == null || !token.contains(".")) {
+            throw new IllegalArgumentException("Invalid token format");
+        }
+        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    }
 
 
     public String generateTokenFromRefreshToken(String refreshToken) {

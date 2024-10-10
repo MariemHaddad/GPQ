@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User,Long> {
+    Optional<User> findByResetToken(String token);
     Optional<User> findByEmail(String email);
-
-    List<User> findByRole(Role role);
     User findByNom(String nom);
+    List<User> findByRole(Role role);
+
 
     List<User> findByAccountStatus(AccountStatus status);
 }
