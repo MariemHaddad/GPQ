@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,20 +44,31 @@ public class AuthenticatonController {
     }
 
     // Méthode pour changer le statut du compte
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/change-account-status")
     public ResponseEntity<?> changeAccountStatus(@RequestParam Long idU, @RequestParam AccountStatus status) {
         log.info("Attempting to change account status for user with ID: {} to status: {}", idU, status);
+
+        // Appel du service pour changer le statut du compte
         service.changeAccountStatus(idU, status);
+
         log.info("Account status changed successfully.");
-        return ResponseEntity.ok("Account status changed successfully.");
+
+        // Retourne une réponse JSON
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Account status changed successfully.");
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(service.authenticate(request));
+        @PostMapping("/authenticate")
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
+        try {
+            AuthenticationResponse response = service.authenticate(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            // Retournez une réponse avec un message d'erreur
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage())); // Utilisation de Map pour renvoyer un message d'erreur
+        }
     }
-
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

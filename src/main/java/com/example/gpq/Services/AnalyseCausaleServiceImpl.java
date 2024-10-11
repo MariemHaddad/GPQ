@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class AnalyseCausaleServiceImpl implements IAnalyseCausaleService {
-
+    @Autowired
+    private PlanActionServiceImpl planActionService;
     @Autowired
     private AnalyseCausaleRepository analyseCausaleRepository;
     @Autowired
@@ -40,6 +41,24 @@ public class AnalyseCausaleServiceImpl implements IAnalyseCausaleService {
                     .map(pourquoi -> {
                         Action action = new Action();
                         action.setDescription(pourquoi.getAction()); // Action associée à chaque8/// ourquoi
+                        action.setType(null); // Ajoutez votre logique pour définir le type, si nécessaire
+                        // Initialiser les autres champs pour mise à jour ultérieure
+                        action.setResponsable(null);
+                        action.setDatePlanification(null);
+                        action.setDateRealisation(null);
+                        action.setCritereEfficacite(null);
+                        action.setEfficace(null);
+                        action.setCommentaire(null);
+                        action.setPlanAction(planAction); // Associe l'action au plan d'action
+                        return action;
+                    })
+                    .collect(Collectors.toList());
+            planAction.setActions(actions);
+        } else if (analyseCausale.getMethodeAnalyse() == MethodeAnalyse.ISHIKAWA) {
+            List<Action> actions = analyseCausale.getCausesIshikawa().stream()
+                    .map(causeIshikawa -> {
+                        Action action = new Action();
+                        action.setDescription(causeIshikawa.getAction()); // Action associée à chaque8/// ourquoi
                         action.setType(null); // Ajoutez votre logique pour définir le type, si nécessaire
                         // Initialiser les autres champs pour mise à jour ultérieure
                         action.setResponsable(null);

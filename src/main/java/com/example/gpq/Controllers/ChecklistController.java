@@ -68,20 +68,27 @@ public class ChecklistController {
 
     @PutMapping("/updateStatus/{checklistId}")
     @PreAuthorize("hasRole('RQUALITE')")
-    public ResponseEntity<?> updateChecklistStatus(@PathVariable Long checklistId,
-                                                   @RequestBody Map<String, Object> payload) {
-        try {
-            StatusChecklist status = StatusChecklist.valueOf(payload.get("status").toString());
-            String remarque = payload.get("remarque").toString();
-            checklistService.updateChecklistStatus(checklistId, status, remarque);
-            return ResponseEntity.ok(Map.of("message", "Statut de la checklist mis à jour avec succès."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Une erreur est survenue lors de la mise à jour du statut de la checklist."));
-        }
-    }
+    public ResponseEntity<String> updateChecklistStatus(
+            @PathVariable Long checklistId,
+            @RequestBody Map<String, String> requestBody) {
 
+        // Extract 'status' and 'remarque' from the request body
+        String statusString = requestBody.get("status");
+        String remarque = requestBody.get("remarque");
+
+        // Convert the String status to the StatusChecklist enum
+        StatusChecklist status = StatusChecklist.valueOf(statusString);
+
+        // Get the checklist and update its status and remarque
+        Checklist checklist = checklistService.getChecklistData(checklistId);
+        checklist.setStatus(status);  // Set the enum value here
+        checklist.setRemarque(remarque);
+
+        // Save the updated checklist
+        checklistService.saveChecklist(checklist);
+
+        return ResponseEntity.ok("Status and remarque updated successfully");
+    }
     @PutMapping("/updateItems/{checklistId}")
     @PreAuthorize("hasRole('RQUALITE')")
     public ResponseEntity<?> updateChecklistItems(@PathVariable Long checklistId,

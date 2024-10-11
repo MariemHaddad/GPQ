@@ -32,4 +32,19 @@ public class Action {
     @JoinColumn(name = "plan_action_id")
     @JsonBackReference
     private PlanAction planAction;
+    @Override
+    public String toString() {
+        return "Action{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", responsable='" + responsable + '\'' +
+                ", datePlanification=" + datePlanification +
+                ", dateRealisation=" + dateRealisation +
+                ", critereEfficacite='" + critereEfficacite + '\'' +
+                ", efficace=" + efficace +
+                ", commentaire='" + commentaire + '\'' +
+                '}';
+    }
+
 }

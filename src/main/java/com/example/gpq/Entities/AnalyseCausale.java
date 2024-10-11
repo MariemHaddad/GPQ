@@ -34,25 +34,17 @@ public class AnalyseCausale {
     @JoinColumn(name = "checklist_id")
     @JsonManagedReference("checklist-analyse")
     private Checklist checklist;
-
     @OneToMany(mappedBy = "analyseCausale", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("analyse-cinqPourquoi")
+
     private List<Pourquoi> cinqPourquoi = new ArrayList<>();
 
     @OneToMany(mappedBy = "analyseCausale", cascade = CascadeType.ALL)
     @JsonManagedReference("analyse-causesIshikawa")
+
     private List<CauseIshikawa> causesIshikawa = new ArrayList<>();
     @OneToOne(mappedBy = "analyseCausale", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("analyse-planActions")
     private PlanAction planAction;
-    @Override
-    public String toString() {
-        return "AnalyseCausale{" +
-                "idAN=" + idAN +
-                ", typeProbleme=" + typeProbleme +
-                ", identificationProbleme='" + identificationProbleme + '\'' +
-                ", methodeAnalyse=" + methodeAnalyse +
-                '}';
-    }
 
 }

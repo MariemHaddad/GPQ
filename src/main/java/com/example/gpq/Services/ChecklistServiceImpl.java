@@ -4,6 +4,7 @@ import com.example.gpq.Entities.*;
 import com.example.gpq.Repositories.ChecklistRepository;
 import com.example.gpq.Repositories.ItemChecklistRepository;
 import com.example.gpq.Repositories.PhaseRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -61,16 +62,27 @@ public class ChecklistServiceImpl implements IChecklistService {
     public void saveChecklist(Checklist checklist) {
         checklistRepository.save(checklist);
     }
+    @Override
+    public Checklist getChecklistData(Long checklistId) {
+        return checklistRepository.findById(checklistId)
+                .orElseThrow(() -> new EntityNotFoundException("Checklist not found with id " + checklistId));
+    }
 
     @Override
     public Checklist updateChecklistStatus(Long checklistId, StatusChecklist status, String remarque) {
         Checklist checklist = checklistRepository.findById(checklistId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid checklist ID"));
+
+        System.out.println("Checklist avant mise à jour : " + checklist);
+
         checklist.setStatus(status);
         checklist.setRemarque(remarque);
-        return checklistRepository.save(checklist);
-    }
 
+        Checklist updatedChecklist = checklistRepository.save(checklist);
+        System.out.println("Checklist après mise à jour : " + updatedChecklist);
+
+        return updatedChecklist;
+    }
     @Override
     public void updateChecklistItems(Long checklistId, List<ChecklistItem> updatedItems) {
         Checklist checklist = checklistRepository.findById(checklistId)

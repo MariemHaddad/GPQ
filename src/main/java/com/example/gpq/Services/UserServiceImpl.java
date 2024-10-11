@@ -1,8 +1,10 @@
 package com.example.gpq.Services;
 
+import com.example.gpq.Entities.AccountStatus;
 import com.example.gpq.Entities.Role;
 import com.example.gpq.Entities.User;
 import com.example.gpq.Repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,10 +40,12 @@ public class UserServiceImpl implements IUserService {
         return userRepository.findAll(); // Assuming userRepository is your JPA repository for User
     }
     @Override
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id); // Suppression de l'utilisateur
+    public void blockUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+        user.setAccountStatus(AccountStatus.BLOCKED);  // Changer le statut de l'utilisateur
+        userRepository.save(user);  // Sauvegarder les modifications
     }
-
     @Override
     public User updateUser(Long id, User updatedUser) {
         return userRepository.findById(id).map(user -> {
@@ -49,7 +53,9 @@ public class UserServiceImpl implements IUserService {
             user.setPrenom(updatedUser.getPrenom());
             user.setEmail(updatedUser.getEmail());
             user.setRole(updatedUser.getRole());
+            user.setAccountStatus(updatedUser.getAccountStatus());
             return userRepository.save(user);
+
         }).orElseThrow(() -> new NoSuchElementException("User not found with id " + id));
     }
 

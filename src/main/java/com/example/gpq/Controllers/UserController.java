@@ -39,12 +39,11 @@ public class UserController {
         List<User> allUsers = userService.getAllUsers();
         return ResponseEntity.ok(allUsers);
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/block/{id}")
+    public ResponseEntity<Void> blockUser(@PathVariable Long id) {
+        userService.blockUser(id);  // Bloquer l'utilisateur au lieu de le supprimer
+        return ResponseEntity.ok().build();
     }
-
     @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         User user = userService.updateUser(id, updatedUser);

@@ -4,8 +4,10 @@ import com.example.gpq.Entities.Action;
 import com.example.gpq.Entities.PlanAction;
 import com.example.gpq.Repositories.ActionRepository;
 import com.example.gpq.Repositories.PlanActionRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,22 +35,59 @@ public class PlanActionServiceImpl implements IPlanActionService {
     public List<PlanAction> getAllPlansAction() {
         return planActionRepository.findAll();
     }
-
+    @Transactional
     @Override
     public PlanAction updatePlanAction(Long id, PlanAction planActionDetails) {
-        Optional<PlanAction> planActionOptional = planActionRepository.findById(id);
-        if (planActionOptional.isPresent()) {
-            PlanAction planAction = planActionOptional.get();
+        // Récupérer le PlanAction existant
+        PlanAction existingPlanAction = planActionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("PlanAction non trouvé"));
 
-            // Mise à jour des champs du plan d'action
-            planAction.setLeçonTirées(planActionDetails.getLeçonTirées());
-            planAction.setActions(planActionDetails.getActions()); // Met à jour les actions associées
+        // Log du PlanAction existant avant mise à jour
+        System.out.println("Existing PlanAction before update: " + existingPlanAction);
 
-            return planActionRepository.save(planAction);
+        // Mettre à jour les champs du PlanAction existant
+        existingPlanAction.setLeconTirees(planActionDetails.getLeconTirees());
+
+        // Mettre à jour ou ajouter les actions
+        List<Action> updatedActions = planActionDetails.getActions();
+
+        if (updatedActions != null) {
+            // Parcourir les actions mises à jour
+            for (Action updatedAction : updatedActions) {
+                if (updatedAction.getId() != null) {
+                    // Trouver l'action existante
+                    Action existingAction = actionRepository.findById(updatedAction.getId()).orElse(null);
+                    if (existingAction != null) {
+                        // Mettre à jour les champs de l'action existante
+                        existingAction.setDescription(updatedAction.getDescription());
+                        existingAction.setType(updatedAction.getType());
+                        existingAction.setResponsable(updatedAction.getResponsable());
+                        existingAction.setDatePlanification(updatedAction.getDatePlanification());
+                        existingAction.setDateRealisation(updatedAction.getDateRealisation());
+                        existingAction.setCritereEfficacite(updatedAction.getCritereEfficacite());
+                        existingAction.setEfficace(updatedAction.getEfficace());
+                        existingAction.setCommentaire(updatedAction.getCommentaire());
+                        // Enregistrer les modifications de l'action
+                        actionRepository.save(existingAction);
+                    } else {
+                        // Si l'action n'existe pas, l'ajouter à la liste des actions
+                        updatedAction.setPlanAction(existingPlanAction);
+                        existingPlanAction.getActions().add(updatedAction);
+                    }
+                } else {
+                    // Si l'ID de l'action est nul, ajouter l'action comme nouvelle
+                    updatedAction.setPlanAction(existingPlanAction);
+                    existingPlanAction.getActions().add(updatedAction);
+                }
+            }
         }
-        return null; // Si l'ID est introuvable
-    }
 
+        // Enregistrer le PlanAction mis à jour
+        PlanAction savedPlanAction = planActionRepository.save(existingPlanAction);
+        System.out.println("Updated PlanAction saved: " + savedPlanAction);
+
+        return savedPlanAction;
+    }
     @Override
     public void deletePlanAction(Long id) {
         planActionRepository.deleteById(id);

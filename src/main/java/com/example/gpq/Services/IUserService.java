@@ -19,7 +19,7 @@ public interface IUserService extends UserDetailsService {
     User findById(Long id);
     User findByEmail(String email);
     List<User> getAllUsers();
-    void deleteUser(Long id); // Doit correspondre à l'implémentation dans la classe de service
+    void blockUser(Long id); // Doit correspondre à l'implémentation dans la classe de service
     User updateUser(Long id, User updatedUser);
     List<User> findByRole(Role chefdeprojet);
 }

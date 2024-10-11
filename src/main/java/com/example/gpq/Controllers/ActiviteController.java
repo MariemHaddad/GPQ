@@ -5,11 +5,14 @@ import com.example.gpq.Services.IActiviteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/activites")
@@ -25,18 +28,26 @@ private IActiviteService activiteService;
         List<Activite> activites = activiteService.getAllActivites();
         return ResponseEntity.ok(activites);
     }
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/ajouter")
-    public ResponseEntity<String> ajouterActivite(@RequestBody Activite activite) {
+    public ResponseEntity<Map<String, String>> ajouterActivite(@RequestBody Activite activite) {
         activiteService.ajouterActivite(activite);
-        return ResponseEntity.ok("Activité ajoutée avec succès.");
+
+        // Créer un objet JSON pour la réponse
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Activité ajoutée avec succès.");
+        response.put("nomActivite", activite.getNomA()); // Ajouter le nom de l'activité si nécessaire
+        return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/modifier/{id}")
-    public ResponseEntity<String> modifierActivite(@PathVariable("id") Long id, @RequestBody String nouveauNom) {
+    public ResponseEntity<Map<String, String>> modifierActivite(@PathVariable("id") Long id, @RequestBody String nouveauNom) {
         activiteService.modifierActivite(id, nouveauNom);
-        return ResponseEntity.ok("Activité modifiée avec succès.");
+
+        // Créer un objet JSON avec un message et le nouveau nom de l'activité
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Activité modifiée avec succès.");
+        response.put("nouveauNom", nouveauNom); // Ajouter le nouveau nom de l'activité
+        return ResponseEntity.ok(response);
     }
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/supprimer/{id}")

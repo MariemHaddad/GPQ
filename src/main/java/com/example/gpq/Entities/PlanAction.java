@@ -22,14 +22,21 @@ public class PlanAction {
     @Column(name = "id", nullable = false)
     private Long idPa;
 
-    private String LeçonTirées;
+    @Column(name = "lecon_tirees") // S'assurer que le nom correspond à la colonne de la base de données
+    private String leconTirees;
 
     @OneToOne
     @JoinColumn(name = "analyse_causale_id", referencedColumnName = "id_an")
     @JsonBackReference("analyse-planActions")
     private AnalyseCausale analyseCausale;
-    @OneToMany(mappedBy = "planAction", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "planAction", cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<Action> actions = new ArrayList<>();
-
+    @Override
+    public String toString() {
+        return "PlanAction{" +
+                "idPa=" + idPa +
+                ", leconTirees='" + leconTirees + '\'' +
+                ", actionsCount=" + (actions != null ? actions.size() : 0) +
+                '}';
+    }
 }

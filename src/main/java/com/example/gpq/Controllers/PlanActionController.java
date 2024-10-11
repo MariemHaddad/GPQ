@@ -4,6 +4,8 @@ import com.example.gpq.Entities.Action;
 import com.example.gpq.Entities.PlanAction;
 import com.example.gpq.Repositories.PlanActionRepository;
 import com.example.gpq.Services.IPlanActionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +23,7 @@ public class PlanActionController {
     private IPlanActionService planActionService;
     @Autowired
     private PlanActionRepository planActionRepository;
-
+    private static final Logger logger = LoggerFactory.getLogger(ChecklistController.class);
     // Créer ou mettre à jour un plan d'action (automatique ou initial)
     @PostMapping("/add")
     @PreAuthorize("hasRole('RQUALITE')")
@@ -46,11 +48,16 @@ public class PlanActionController {
     public ResponseEntity<PlanAction> updatePlanAction(
             @PathVariable Long id,
             @RequestBody PlanAction planActionDetails) {
-        // Assurez-vous que les données sont correctes avant de mettre à jour
+
+        // Logguez le plan d'action reçu
+        System.out.println("Plan d'action reçu pour mise à jour: " + planActionDetails);
+
         PlanAction updatedPlanAction = planActionService.updatePlanAction(id, planActionDetails);
+
         if (updatedPlanAction == null) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.ok(updatedPlanAction);
     }
     @GetMapping("/analyseCausale/{idAN}/planAction")
