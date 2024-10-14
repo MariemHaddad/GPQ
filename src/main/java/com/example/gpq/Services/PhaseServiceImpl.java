@@ -29,13 +29,15 @@ public class PhaseServiceImpl implements IPhaseService {
     }
     private static final List<String> VALID_PHASE_NAMES = Arrays.asList(
             "La conception préliminaire",
-            "La conception détaillée",
-            "La mise en œuvre",
-            "La vérification",
-            "La validation",
+            "Conception détaillée",
+            "Manuel d'utilisation",
+            "Tests unitaires",
+            "Le Plan d'Integration",
             "Code",
             "Spécification",
-            "Livraison"
+            "Livraison",
+            "Le Plan de Validation",
+            "Le Plan de Management (PM)"
             // Add other valid phase names here
     );
 

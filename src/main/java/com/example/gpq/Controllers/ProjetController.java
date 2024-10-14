@@ -112,7 +112,11 @@ public class ProjetController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié.");
         }
     }
-
+    @GetMapping("/all")
+    public ResponseEntity<List<Client>> getAllClients() {
+        List<Client> clients = clientService.findAll();
+        return ResponseEntity.ok(clients);
+    }
     @GetMapping("/activites/{activiteId}/projets")
     @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('RQUALITE')")
     public ResponseEntity<List<Projet>> getProjetsByActivite(@PathVariable Long activiteId) {
