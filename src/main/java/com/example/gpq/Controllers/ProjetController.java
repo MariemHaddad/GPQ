@@ -112,6 +112,11 @@ public class ProjetController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié.");
         }
     }
+    @GetMapping("/all/projets")
+    public ResponseEntity<List<Projet>> getAllProjets() {
+        List<Projet> projets = projetService.findAll();
+        return ResponseEntity.ok(projets);
+    }
     @GetMapping("/all")
     public ResponseEntity<List<Client>> getAllClients() {
         List<Client> clients = clientService.findAll();
@@ -245,6 +250,8 @@ public class ProjetController {
 
         return year + "-" + semestre;
     }
+
+
     @PutMapping("/modifier/{projetId}")
     @PreAuthorize("hasRole('CHEFDEPROJET') or hasRole('DIRECTEUR')")
     public ResponseEntity<String> modifierProjet(@PathVariable Long projetId, @RequestBody Projet projetDetails) {

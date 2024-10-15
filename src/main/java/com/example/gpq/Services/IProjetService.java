@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface IProjetService {
+    List<Projet> findAll();
     double calculerDDEPourProjet(Long projetId);
     List<RunSemestrielDTO> getRunsSemestriels(Long activiteId);
     double getTauxCByProjet(Long idProjet);
@@ -28,6 +29,7 @@ public interface IProjetService {
     Optional<Projet> findById(Long id);
     void save(Projet projet);
     void delete(Projet projet);
+
 
 
 }

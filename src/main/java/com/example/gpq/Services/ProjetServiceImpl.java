@@ -25,7 +25,10 @@ public class ProjetServiceImpl implements IProjetService {
 
     @Autowired
     private ProjetRepository projetRepository;
-
+    @Override
+    public List<Projet> findAll() {  // Modifiez ici pour correspondre à la méthode de l'interface
+        return projetRepository.findAll();
+    }
     public void ajouterProjetAvecAffectation(User utilisateurConnecte, Projet projet,
                                              String chefDeProjetNom, String responsableQualiteNom) {
         // Vérifier le rôle de l'utilisateur connecté
